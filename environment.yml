@@ -1,0 +1,9 @@
+name: smoltools
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10.4
+  - pandas=1.4.2
+  - altair=4.2.0
+  - scipy=1.8.0
+  - biopython=1.79
