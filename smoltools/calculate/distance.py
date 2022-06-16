@@ -6,7 +6,7 @@ import pandas as pd
 import scipy.spatial.distance as ssd
 
 
-def pairwise_distance(df: pd.DataFrame) -> np.ndarray:
+def _pairwise_distance(df: pd.DataFrame) -> np.ndarray:
     return ssd.cdist(df, df, 'euclidean')
 
 
@@ -21,7 +21,7 @@ def calculate_pairwise_distances(df: pd.DataFrame) -> pd.DataFrame:
     """
     return (
         pd.DataFrame(
-            pairwise_distance(df),
+            _pairwise_distance(df),
             index=df.index,
             columns=df.index,
         )

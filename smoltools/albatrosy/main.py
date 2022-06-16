@@ -2,8 +2,6 @@ from pathlib import Path
 
 from Bio.PDB.Atom import Atom
 from Bio.PDB.Residue import Residue
-
-# import numpy as np
 import pandas as pd
 
 import smoltools.calculate.distance as distance
