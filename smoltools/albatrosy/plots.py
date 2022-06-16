@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from smoltools.calculate.distance import _merge_pairwise_distances
+from smoltools.albatrosy.utils import splice_conformation_tables
 
 
 def distance_map(df: pd.DataFrame) -> alt.Chart:
@@ -65,6 +66,11 @@ def noe_map(df: pd.DataFrame) -> alt.Chart:
             height=600,
         )
     )
+
+
+def spliced_noe_map(df_a: pd.DataFrame, df_b: pd.DataFrame) -> alt.Chart:
+    spliced_df = splice_conformation_tables(df_a, df_b)
+    return noe_map(spliced_df)
 
 
 def delta_distance_map(
