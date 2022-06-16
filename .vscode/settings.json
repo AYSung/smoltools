@@ -1,0 +1,22 @@
+{
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true,
+    "python.linting.flake8Args": [
+        "--extend-ignore=E203,E501,W503",
+        "--max-line-length=88",
+        "--per-file-ignores=__init__.py:F401",
+    ],
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--skip-string-normalization",
+    ],
+    "editor.rulers": [
+        88
+    ],
+    "editor.formatOnSave": true,
+    "python.testing.pytestArgs": [
+        "fret0"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
