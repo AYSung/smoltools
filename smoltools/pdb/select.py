@@ -10,7 +10,7 @@ from Bio.PDB import Selection
 from Bio.PDB.Structure import Structure
 
 
-def get_chain(structure: Structure, model: int = 0, chain: str = 'A') -> Chain:
+def get_chain(structure: Structure, model: int, chain: str) -> Chain:
     """
     Returns a chain from a PDB structure object. Default is to return chain A of the
     first model.
