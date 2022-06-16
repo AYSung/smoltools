@@ -7,8 +7,8 @@ from Bio.PDB.Residue import Residue
 import pandas as pd
 
 import smoltools.calculate.distance as distance
-import smoltools.pdb.load as load
-import smoltools.pdb.select as select
+import smoltools.pdbtools.load as load
+import smoltools.pdbtools.select as select
 
 
 def get_labelled_carbons(residues: list[Residue]) -> list[Atom]:
