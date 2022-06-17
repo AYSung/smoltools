@@ -1,6 +1,5 @@
-from pathlib import Path
-
 from Bio.PDB.Atom import Atom
+from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
 import pandas as pd
 
@@ -31,12 +30,18 @@ def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
     )
 
 
-def structure_to_distances(
-    path: str | Path, model: int = 0, chain: str = 'A'
-) -> pd.DataFrame:
+def structure_to_chain(path: str, model: int = 0, chain: str = 'A') -> Chain:
     structure = load.read_pdb_from_path(path)
-    chain = select.get_chain(structure, model=model, chain=chain)
+    return select.get_chain(structure, model=model, chain=chain)
+
+
+def chain_to_distances(chain: Chain) -> pd.DataFrame:
     residues = select.get_residues(chain, residue_filter={'VAL', 'LEU', 'ILE'})
     labelled_atoms = get_labelled_carbons(residues)
     coords = coordinate_table(labelled_atoms)
     return distance.calculate_pairwise_distances(coords)
+
+
+def structure_to_distances(path: str, model: int = 0, chain: str = 'A') -> pd.DataFrame:
+    chain = structure_to_chain(path, model=model, chain=chain)
+    return chain_to_distances(chain)

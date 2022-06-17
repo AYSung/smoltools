@@ -6,24 +6,30 @@ from smoltools.calculate.distance import _merge_pairwise_distances
 from smoltools.albatrosy.utils import splice_conformation_tables
 
 
-def distance_map(df: pd.DataFrame) -> alt.Chart:
+def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
+    SIZE = 600
     return (
         alt.Chart(df)
         .mark_rect()
         .encode(
             x=alt.X('atom_id_1', title='Atom ID', sort=None),
             y=alt.Y('atom_id_2', title='Atom ID', sort=None),
-            color='distance',
-            tooltip=[
-                alt.Tooltip('atom_id_1', title='Atom #1'),
-                alt.Tooltip('atom_id_2', title='Atom #2'),
-                alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
-            ],
         )
         .properties(
-            width=600,
-            height=600,
+            width=SIZE,
+            height=SIZE,
         )
+    )
+
+
+def distance_map(df: pd.DataFrame) -> alt.Chart:
+    return _distance_map_base(df).encode(
+        color='distance',
+        tooltip=[
+            alt.Tooltip('atom_id_1', title='Atom #1'),
+            alt.Tooltip('atom_id_2', title='Atom #2'),
+            alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
+        ],
     )
 
 
@@ -31,7 +37,7 @@ def _add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
     return df.assign(
         noe_strength=lambda x: pd.cut(
             x.distance,
-            bins=[0, 2.5, 3.5, 5, 10, np.inf],
+            bins=[0, 2.5, 3.5, 5, 15, np.inf],
             include_lowest=True,
             labels=['strong', 'medium', 'weak', 'very weak', 'none'],
         )
@@ -39,32 +45,22 @@ def _add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def noe_map(df: pd.DataFrame) -> alt.Chart:
-    return (
-        alt.Chart(df.pipe(_add_noe_bins))
-        .mark_rect()
-        .encode(
-            x=alt.X('atom_id_1', title='atom ID', sort=None),
-            y=alt.Y('atom_id_2', title='atom ID', sort=None),
-            color=alt.Color(
-                'noe_strength',
-                title='NOE',
-                scale=alt.Scale(
-                    domain=['strong', 'medium', 'weak', 'very weak', 'none'],
-                    scheme='blues',
-                    reverse=True,
-                ),
+    return _distance_map_base(df.pipe(_add_noe_bins)).encode(
+        color=alt.Color(
+            'noe_strength',
+            title='NOE',
+            scale=alt.Scale(
+                domain=['strong', 'medium', 'weak', 'very weak', 'none'],
+                scheme='blues',
+                reverse=True,
             ),
-            tooltip=[
-                alt.Tooltip('atom_id_1', title='Atom #1'),
-                alt.Tooltip('atom_id_2', title='Atom #2'),
-                alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
-                alt.Tooltip('noe_strength', title='NOE'),
-            ],
-        )
-        .properties(
-            width=600,
-            height=600,
-        )
+        ),
+        tooltip=[
+            alt.Tooltip('atom_id_1', title='Atom #1'),
+            alt.Tooltip('atom_id_2', title='Atom #2'),
+            alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
+            alt.Tooltip('noe_strength', title='NOE'),
+        ],
     )
 
 
@@ -80,32 +76,20 @@ def delta_distance_map(
         delta_distance=lambda x: x.distance_a - x.distance_b
     )
     range_max = df.delta_distance.abs().max()
-    return (
-        alt.Chart(df)
-        .mark_rect()
-        .encode(
-            x=alt.X('atom_id_1', title='atom ID', sort=None),
-            y=alt.Y('atom_id_2', title='atom ID', sort=None),
-            color=alt.Color(
-                'delta_distance',
-                scale=alt.Scale(scheme='redblue', domain=[-range_max, range_max]),
+    return _distance_map_base(df).encode(
+        color=alt.Color(
+            'delta_distance',
+            scale=alt.Scale(scheme='redblue', domain=[-range_max, range_max]),
+        ),
+        tooltip=[
+            alt.Tooltip('atom_id_1', title='Atom #1'),
+            alt.Tooltip('atom_id_2', title='Atom #2'),
+            alt.Tooltip('distance_a', title='Conformation A (\u212B)', format='.1f'),
+            alt.Tooltip('distance_b', title='Conformation B (\u212B)', format='.1f'),
+            alt.Tooltip(
+                'delta_distance', title='\u0394Distance (\u212B)', format='.1f'
             ),
-            tooltip=[
-                alt.Tooltip('atom_id_1', title='Atom #1'),
-                alt.Tooltip('atom_id_2', title='Atom #2'),
-                alt.Tooltip('distance_a', title='Apo distance (\u212B)', format='.1f'),
-                alt.Tooltip(
-                    'distance_b', title='Bound distance (\u212B)', format='.1f'
-                ),
-                alt.Tooltip(
-                    'delta_distance', title='\u0394Distance (\u212B)', format='.1f'
-                ),
-            ],
-        )
-        .properties(
-            width=600,
-            height=600,
-        )
+        ],
     )
 
 
