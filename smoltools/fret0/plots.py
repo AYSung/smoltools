@@ -39,12 +39,18 @@ def delta_distance_map(
 ) -> alt.Chart:
     df = (
         distance._merge_pairwise_distances(distances_a, distances_b)
-        .assign(delta_distance=lambda x: (x.distance_a - x.distance_b).abs())
-        .loc[lambda x: (x.atom_id_1 < x.atom_id_2) & (x.delta_distance > cutoff)]
+        .assign(delta_distance=lambda x: (x.distance_a - x.distance_b))
+        .loc[lambda x: (x.atom_id_1 < x.atom_id_2) & (x.delta_distance.abs() > cutoff)]
     )
 
+    range_max = df.delta_distance.abs().max()
+
     return _distance_map_base(df).encode(
-        color=alt.Color('delta_distance', title='\u0394Distance (\u212B)'),
+        color=alt.Color(
+            'delta_distance',
+            title='\u0394Distance (\u212B)',
+            scale=alt.Scale(domain=[-range_max, range_max], scheme='redblue'),
+        ),
         tooltip=[
             alt.Tooltip('atom_id_1', title='Residue #1'),
             alt.Tooltip('atom_id_2', title='Residue #2'),
@@ -57,11 +63,17 @@ def delta_distance_map(
     )
 
 
-def delta_e_fret_map(df: pd.DataFrame) -> alt.Chart:
+def delta_e_fret_map(df: pd.DataFrame, cutoff: float = 0.1) -> alt.Chart:
+    range_max = df.delta_E_fret.abs().max()
+
     return _distance_map_base(
-        df.loc[lambda x: (x.atom_id_1 < x.atom_id_2) & (x.delta_E_fret > 0.1)]
+        df.loc[lambda x: (x.atom_id_1 < x.atom_id_2) & (x.delta_E_fret.abs() > cutoff)]
     ).encode(
-        color=alt.Color('delta_E_fret', title='\u0394E_fret'),
+        color=alt.Color(
+            'delta_E_fret',
+            title='\u0394E_fret',
+            scale=alt.Scale(domain=[-range_max, range_max], scheme='redblue'),
+        ),
         tooltip=[
             alt.Tooltip('atom_id_1', title='Residue #1'),
             alt.Tooltip('atom_id_2', title='Residue #2'),

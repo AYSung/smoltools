@@ -11,7 +11,7 @@ def _calculate_e_fret(distance: pd.Series, r0: float) -> pd.Series:
 
 def _calculate_delta_e_fret(e_fret_a: pd.Series, e_fret_b: pd.Series) -> pd.Series:
     """Calculate the magnitude of the difference in FRET efficiencies."""
-    return np.abs(e_fret_a - e_fret_b)
+    return e_fret_a - e_fret_b
 
 
 def e_fret_between_conformations(df: pd.DataFrame, r0: float) -> pd.DataFrame:
