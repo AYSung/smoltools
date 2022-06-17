@@ -5,13 +5,12 @@ import altair as alt
 import pandas as pd
 
 from smoltools.fret0.efficiency import generate_r0_curve
-from smoltools.fret0.utils import splice_e_fret_tables
 import smoltools.calculate.distance as distance
 import smoltools.resources.colors as colors
 
 
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
-    SIZE = 800
+    SIZE = 600
     return (
         alt.Chart(df)
         .mark_rect()
@@ -34,18 +33,23 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
     )
 
 
-# TODO: Better use of space
 def delta_distance_map(
-    distances_a: pd.DataFrame, distances_b: pd.DataFrame, cutoff: int = 10
+    distances_a: pd.DataFrame, distances_b: pd.DataFrame, cutoff: int = 5
 ) -> alt.Chart:
     df = (
         distance._merge_pairwise_distances(distances_a, distances_b)
-        .assign(delta_distance=lambda x: (x.distance_a - x.distance_b).abs())
-        .loc[lambda x: (x.atom_id_1 < x.atom_id_2) & (x.delta_distance > cutoff)]
+        .assign(delta_distance=lambda x: (x.distance_a - x.distance_b))
+        .loc[lambda x: (x.atom_id_1 < x.atom_id_2) & (x.delta_distance.abs() > cutoff)]
     )
 
+    range_max = df.delta_distance.abs().max()
+
     return _distance_map_base(df).encode(
-        color=alt.Color('delta_distance', title='\u0394Distance (\u212B)'),
+        color=alt.Color(
+            'delta_distance',
+            title='\u0394Distance (\u212B)',
+            scale=alt.Scale(domain=[-range_max, range_max], scheme='redblue'),
+        ),
         tooltip=[
             alt.Tooltip('atom_id_1', title='Residue #1'),
             alt.Tooltip('atom_id_2', title='Residue #2'),
@@ -58,36 +62,49 @@ def delta_distance_map(
     )
 
 
-def delta_e_fret_map(df: pd.DataFrame) -> alt.Chart:
+def delta_e_fret_map(df: pd.DataFrame, cutoff: float = 0.1) -> alt.Chart:
+    range_max = df.delta_E_fret.abs().max()
+
     return _distance_map_base(
-        df.loc[lambda x: (x.atom_id_1 < x.atom_id_2) & (x.delta_E_fret > 0.1)]
+        df.loc[lambda x: (x.atom_id_1 < x.atom_id_2) & (x.delta_E_fret.abs() > cutoff)]
     ).encode(
-        color=alt.Color('delta_E_fret', title='\u0394E_fret'),
+        color=alt.Color(
+            'delta_E_fret',
+            title='\u0394E_fret',
+            scale=alt.Scale(domain=[-range_max, range_max], scheme='redblue'),
+        ),
         tooltip=[
             alt.Tooltip('atom_id_1', title='Residue #1'),
             alt.Tooltip('atom_id_2', title='Residue #2'),
-            alt.Tooltip('E_fret_a', title='Conformation A', format='.1f'),
-            alt.Tooltip('E_fret_b', title='Conformation B', format='.1f'),
-            alt.Tooltip('delta_E_fret', title='\u0394E_fret', format='.1f'),
+            alt.Tooltip('E_fret_a', title='Conformation A', format='.2f'),
+            alt.Tooltip('E_fret_b', title='Conformation B', format='.2f'),
+            alt.Tooltip('delta_E_fret', title='\u0394E_fret', format='.2f'),
         ],
     )
 
 
-def spliced_e_fret_map(df) -> alt.Chart:
-    return _distance_map_base(
-        df.pipe(splice_e_fret_tables).loc[lambda x: x.delta_E_fret > 0.1]
-    ).encode(
-        color=alt.Color('E_fret', title='E_fret'),
-        tooltip=[
-            alt.Tooltip('atom_id_1', title='Residue #1'),
-            alt.Tooltip('atom_id_2', title='Residue #2'),
-            alt.Tooltip('E_fret', title='E_fret', format='.1f'),
-            alt.Tooltip('delta_E_fret', title='\u0394E_fret', format='.1f'),
-        ],
+def e_fret_scatter(df: pd.DataFrame, cutoff: float = 0.2) -> alt.Chart:
+    range_max = df.delta_E_fret.abs().max()
+
+    return (
+        alt.Chart(df.loc[lambda x: x.delta_E_fret.abs() > cutoff])
+        .mark_circle(size=100)
+        .encode(
+            x=alt.X('E_fret_a', title='E_fret in A'),
+            y=alt.Y('E_fret_b', title='E_fret in B'),
+            color=alt.Color(
+                'delta_E_fret',
+                title='\u0394E_fret',
+                scale=alt.Scale(domain=[-range_max, range_max], scheme='redblue'),
+            ),
+            opacity=alt.value(0.4),
+            tooltip=[
+                alt.Tooltip('atom_id_1', title='Residue #1'),
+                alt.Tooltip('atom_id_2', title='Residue #2'),
+            ],
+        )
+        .properties(width=600, height=600)
     )
-
-
-# TODO: E_fret scatter once surface residues are filtered for.
 
 
 def r0_curves(distance_a: float, distance_b: float) -> alt.Chart:
