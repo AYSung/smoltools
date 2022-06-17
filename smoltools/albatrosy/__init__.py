@@ -6,5 +6,6 @@ from smoltools.albatrosy.main import (
 from smoltools.albatrosy.utils import (
     splice_conformation_tables,
 )
+from smoltools.calculate.distance import pairwise_distance_between_conformations
 
 import smoltools.albatrosy.plots as plots

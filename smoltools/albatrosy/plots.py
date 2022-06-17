@@ -2,9 +2,6 @@ import altair as alt
 import numpy as np
 import pandas as pd
 
-from smoltools.calculate.distance import _merge_pairwise_distances
-from smoltools.albatrosy.utils import splice_conformation_tables
-
 
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
     SIZE = 600
@@ -64,18 +61,9 @@ def noe_map(df: pd.DataFrame) -> alt.Chart:
     )
 
 
-def spliced_noe_map(df_a: pd.DataFrame, df_b: pd.DataFrame) -> alt.Chart:
-    spliced_df = splice_conformation_tables(df_a, df_b)
-    return noe_map(spliced_df)
-
-
-def delta_distance_map(
-    distances_a: pd.DataFrame, distances_b: pd.DataFrame
-) -> alt.Chart:
-    df = _merge_pairwise_distances(distances_a, distances_b).assign(
-        delta_distance=lambda x: x.distance_a - x.distance_b
-    )
+def delta_distance_map(df: pd.DataFrame) -> alt.Chart:
     range_max = df.delta_distance.abs().max()
+
     return _distance_map_base(df).encode(
         color=alt.Color(
             'delta_distance',
@@ -94,17 +82,16 @@ def delta_distance_map(
     )
 
 
-def distance_scatter(
-    distances_a: pd.DataFrame, distances_b: pd.DataFrame, noe_threshold: float
-) -> alt.Chart:
-    df = (
-        _merge_pairwise_distances(distances_a, distances_b)
-        .loc[lambda x: (x.distance_a < noe_threshold) | (x.distance_b < noe_threshold)]
-        .assign(delta_distance=lambda x: x.distance_a - x.distance_b)
-    )
+def distance_scatter(df: pd.DataFrame, noe_threshold: float) -> alt.Chart:
     range_max = df.delta_distance.abs().max()
+
     return (
-        alt.Chart(df)
+        alt.Chart(
+            df.loc[
+                lambda x: (x.distance_a < noe_threshold)
+                | (x.distance_b < noe_threshold)
+            ]
+        )
         .mark_circle(size=100)
         .encode(
             x=alt.X('distance_a', title='Distance in apo conformation'),
