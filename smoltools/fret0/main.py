@@ -16,7 +16,7 @@ def chain_to_distances(chain: Chain, sasa_cutoff: float = None) -> pd.DataFrame:
     residues = select.get_residues(chain)
     alpha_carbons = select.get_alpha_carbons(residues)
     if sasa_cutoff is not None:
-        alpha_carbons = select.filter_by_b_factor(alpha_carbons, cutoff=0.3)
+        alpha_carbons = select.filter_by_b_factor(alpha_carbons, cutoff=sasa_cutoff)
     coords = coordinate_table(alpha_carbons)
     return distance.calculate_pairwise_distances(coords)
 
