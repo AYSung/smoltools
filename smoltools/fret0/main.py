@@ -38,35 +38,3 @@ def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
     return pd.DataFrame(atom_info, columns=['atom_id', 'x', 'y', 'z']).set_index(
         'atom_id'
     )
-
-
-def pairwise_distances(
-    distances_a: pd.DataFrame,
-    distances_b: pd.DataFrame,
-) -> pd.DataFrame:
-    """
-    Reads in the alpha carbon coordinates of two pdb structures representing two
-    conformations of the same protein and returns a dataframe of the difference
-    in pairwise distances between residues between the two conformations.
-
-    Args:
-        structure_a (Structure): pdb Structure object for conformation A
-        chain_a (str): chain id for protein of interest in the pdb file for conformation A
-        structure_b (Structure): pdb Structure object for conformation B
-        chain_b (str): chain id for protein of interest in the pdb file for conformation B
-        sasa_cutoff (float): optional value for filtering pairwise distances that only
-            contain comparisons between surface exposed residues; requires that the
-            relative solvent accessible surface area of each residue be loaded into the
-            b factor column of both pdb files.
-
-    Returns:
-        DataFrame: pandas DataFrame with the pairwise distances between residues in each
-            conformation as well as the difference in pairwise distances between
-            conformations.
-    """
-
-    return distance._merge_pairwise_distances(distances_a, distances_b).assign(
-        delta_distance=lambda x: distance._calculate_delta_distance(
-            x.distance_a, x.distance_b
-        )
-    )
