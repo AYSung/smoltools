@@ -4,9 +4,7 @@ from itertools import chain
 
 from Bio.PDB.Atom import Atom
 from Bio.PDB.Chain import Chain
-from Bio.PDB.Entity import Entity
 from Bio.PDB.Residue import Residue
-from Bio.PDB import Selection
 from Bio.PDB.Structure import Structure
 
 
@@ -28,7 +26,7 @@ def get_chain(structure: Structure, model: int, chain: str) -> Chain:
     return structure[model][chain]
 
 
-def get_residues(entity: Entity, residue_filter: set[str] = None) -> list[Residue]:
+def get_residues(chain: Chain, residue_filter: set[str] = None) -> list[Residue]:
     """
     Produces a list of all residues in a PDB entity. Can provide a set of specific
         residues to keep.
@@ -44,7 +42,7 @@ def get_residues(entity: Entity, residue_filter: set[str] = None) -> list[Residu
     list[Residue]: List of PDB residue objects in the given entity that meet the
         residue filter.
     """
-    residues = Selection.unfold_entities(entity, 'R')
+    residues = [residue for residue in chain.get_residues()]
     if residue_filter is None:
         return [residue for residue in residues if residue.get_id()[0] == ' ']
     else:
@@ -78,7 +76,7 @@ def get_carbons(
     """
 
     def _get_atoms(residue: Residue, atom_names: list[str]):
-        return [residue[atom_name] for atom_name in atom_names]
+        return [atom for atom in residue.get_atoms() if atom.get_name() in atom_names]
 
     atoms = [
         _get_atoms(residue, atom_select[residue.get_resname()]) for residue in residues
