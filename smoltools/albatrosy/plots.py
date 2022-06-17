@@ -24,7 +24,7 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
 
 def distance_map(df: pd.DataFrame) -> alt.Chart:
     return _distance_map_base(df).encode(
-        color='distance',
+        color=alt.Color('distance', title='Distance (\u212B)'),
         tooltip=[
             alt.Tooltip('atom_id_1', title='Atom #1'),
             alt.Tooltip('atom_id_2', title='Atom #2'),
@@ -79,6 +79,7 @@ def delta_distance_map(
     return _distance_map_base(df).encode(
         color=alt.Color(
             'delta_distance',
+            title='\u0394Distance (\u212B)',
             scale=alt.Scale(scheme='redblue', domain=[-range_max, range_max]),
         ),
         tooltip=[
