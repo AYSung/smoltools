@@ -43,17 +43,8 @@ def _merge_pairwise_distances(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.Data
     )
 
 
-def _calculate_delta_distance(
-    distance_a: pd.Series, distance_b: pd.Series
-) -> pd.Series:
-    """Absolute value of the difference between pairwise differences between the two
-    conformations.
-    """
-    return np.abs(distance_a - distance_b)
-
-
 def pairwise_distance_between_conformations(
-    coord_a: pd.DataFrame, coord_b: pd.DataFrame
+    distances_a: pd.DataFrame, distances_b: pd.DataFrame
 ) -> pd.DataFrame:
     """
     Given two DataFrames with the 3D coordinates of residues in two conformations,
@@ -71,9 +62,7 @@ def pairwise_distance_between_conformations(
             of the two conformations, and the difference in the pairwise distances
             between the conformations. distances reported in angstroms.
     """
-    distance_a = calculate_pairwise_distances(coord_a)
-    distance_b = calculate_pairwise_distances(coord_b)
-
-    return _merge_pairwise_distances(distance_a, distance_b,).assign(
-        delta_distance=lambda x: _calculate_delta_distance(x.distance_a, x.distance_b)
-    )
+    return _merge_pairwise_distances(
+        distances_a,
+        distances_b,
+    ).assign(delta_distance=lambda x: x.distance_a - x.distance_b)
