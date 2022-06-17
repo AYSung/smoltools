@@ -63,7 +63,16 @@ def get_alpha_carbons(residues: list[Residue]) -> list[Atom]:
     --------
     list[Atom]: list of alpha carbons as PDB atom objects.
     """
-    return [residue['CA'] for residue in residues]
+
+    def _get_alpha_carbon(residue: Residue) -> Atom:
+        alpha_carbons = [atom for atom in residue.get_atoms() if atom.get_id() == 'CA']
+        if not alpha_carbons:
+            print(f'{residue} has no alpha carbon')
+
+        return alpha_carbons
+
+    alpha_carbons = [_get_alpha_carbon(residue) for residue in residues]
+    return list(chain(*alpha_carbons))
 
 
 def get_carbons(
