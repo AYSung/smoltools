@@ -103,11 +103,17 @@ def distance_scatter(df: pd.DataFrame, noe_threshold: float) -> alt.Chart:
             ),
             opacity=alt.value(0.5),
             tooltip=[
-                'atom_id_1',
-                'atom_id_2',
-                alt.Tooltip('distance_a', format='.1f'),
-                alt.Tooltip('distance_b', format='.1f'),
-                alt.Tooltip('delta_distance', format='.1f'),
+                alt.Tooltip('atom_id_1', title='Atom #1'),
+                alt.Tooltip('atom_id_2', title='Atom #2'),
+                alt.Tooltip(
+                    'distance_a', title='Conformation A (\u212B)', format='.1f'
+                ),
+                alt.Tooltip(
+                    'distance_b', title='Conformation B (\u212B)', format='.1f'
+                ),
+                alt.Tooltip(
+                    'delta_distance', title='\u0394Distance (\u212B)', format='.1f'
+                ),
             ],
         )
         .properties(
