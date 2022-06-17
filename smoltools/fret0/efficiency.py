@@ -27,20 +27,14 @@ def e_fret_between_conformations(df: pd.DataFrame, r0: float) -> pd.DataFrame:
         DataFrame: pandas DataFrame with FRET efficiency calculate for each residue
             pair, as well as the change in FRET efficiency between conformations.
     """
-    return pd.DataFrame(
-        dict(
-            residue_number_1=df.residue_number_1,
-            residue_number_2=df.residue_number_2,
-            r0=r0,
-        )
-    ).assign(
+    return df[['atom_id_1', 'atom_id_2']].assign(
         E_fret_a=_calculate_e_fret(df.distance_a, r0),
         E_fret_b=_calculate_e_fret(df.distance_b, r0),
         delta_E_fret=lambda x: _calculate_delta_e_fret(x.E_fret_a, x.E_fret_b),
     )
 
 
-def _generate_r0_curve(distance_a: float, distance_b: float) -> pd.DataFrame:
+def generate_r0_curve(distance_a: float, distance_b: float) -> pd.DataFrame:
     """
     Generate data for plotting FRET efficiency as a function of R0 for two distances.
     """

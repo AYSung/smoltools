@@ -1,19 +1,44 @@
-from Bio.PDB.Structure import Structure
+from Bio.PDB.Atom import Atom
+from Bio.PDB.Chain import Chain
 import pandas as pd
 
-from fret0.distance import pairwise_distance_between_conformations
-from fret0.pdb_parser import read_atom_coords, get_sasa
-from fret0.residue_filter import (
-    combine_surface_residues,
-    filter_pairwise_distances_by_sasa,
-)
+import smoltools.calculate.distance as distance
+import smoltools.pdbtools.load as load
+import smoltools.pdbtools.select as select
+
+
+def structure_to_chain(path: str, model: int = 0, chain: str = 'A') -> Chain:
+    structure = load.read_pdb_from_path(path)
+    return select.get_chain(structure, model=model, chain=chain)
+
+
+def chain_to_distances(chain: Chain) -> pd.DataFrame:
+    residues = select.get_residues(chain)
+    alpha_carbons = select.get_alpha_carbons(residues)
+    coords = coordinate_table(alpha_carbons)
+    return distance.calculate_pairwise_distances(coords)
+
+
+def structure_to_distances(path: str, model: int = 0, chain: str = 'A') -> pd.DataFrame:
+    chain = structure_to_chain(path, model=model, chain=chain)
+    return chain_to_distances(chain)
+
+
+def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
+    def _get_atom_info(atom: Atom) -> tuple:
+        residue_number = atom.get_parent().get_id()[1]
+        return residue_number, *atom.get_coord()
+
+    atom_info = [_get_atom_info(atom) for atom in atoms]
+
+    return pd.DataFrame(atom_info, columns=['atom_id', 'x', 'y', 'z']).set_index(
+        'atom_id'
+    )
 
 
 def pairwise_distances(
-    structure_a: Structure,
-    chain_a: str,
-    structure_b: Structure,
-    chain_b: str,
+    distances_a: pd.DataFrame,
+    distances_b: pd.DataFrame,
     sasa_cutoff: float = None,
 ) -> pd.DataFrame:
     """
@@ -36,16 +61,18 @@ def pairwise_distances(
             conformation as well as the difference in pairwise distances between
             conformations.
     """
-    coords_a = read_atom_coords(structure_a, chain_a)
-    coords_b = read_atom_coords(structure_b, chain_b)
-    pairwise_distance_df = pairwise_distance_between_conformations(coords_a, coords_b)
 
     if sasa_cutoff is not None:
-        sasa_a = get_sasa(structure_a, chain_a)
-        sasa_b = get_sasa(structure_a, chain_b)
-        surface_residues = combine_surface_residues(sasa_a, sasa_b, cutoff=sasa_cutoff)
-        pairwise_distance_df = filter_pairwise_distances_by_sasa(
-            pairwise_distance_df, surface_residues
-        )
+        raise NotImplementedError()
+        # sasa_a = get_sasa(structure_a, chain_a)
+        # sasa_b = get_sasa(structure_a, chain_b)
+        # surface_residues = combine_surface_residues(sasa_a, sasa_b, cutoff=sasa_cutoff)
+        # pairwise_distance_df = filter_pairwise_distances_by_sasa(
+        #     pairwise_distance_df, surface_residues
+        # )
 
-    return pairwise_distance_df
+    return distance._merge_pairwise_distances(distances_a, distances_b).assign(
+        delta_distance=lambda x: distance._calculate_delta_distance(
+            x.distance_a, x.distance_b
+        )
+    )
