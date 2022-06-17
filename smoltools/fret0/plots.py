@@ -33,9 +33,8 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
     )
 
 
-# TODO: Better use of space
 def delta_distance_map(
-    distances_a: pd.DataFrame, distances_b: pd.DataFrame, cutoff: int = 10
+    distances_a: pd.DataFrame, distances_b: pd.DataFrame, cutoff: int = 5
 ) -> alt.Chart:
     df = (
         distance._merge_pairwise_distances(distances_a, distances_b)
@@ -84,7 +83,28 @@ def delta_e_fret_map(df: pd.DataFrame, cutoff: float = 0.1) -> alt.Chart:
     )
 
 
-# TODO: E_fret scatter once surface residues are filtered for.
+def e_fret_scatter(df: pd.DataFrame, cutoff: float = 0.2) -> alt.Chart:
+    range_max = df.delta_E_fret.abs().max()
+
+    return (
+        alt.Chart(df.loc[lambda x: x.delta_E_fret.abs() > cutoff])
+        .mark_circle(size=100)
+        .encode(
+            x=alt.X('E_fret_a', title='E_fret in A'),
+            y=alt.Y('E_fret_b', title='E_fret in B'),
+            color=alt.Color(
+                'delta_E_fret',
+                title='\u0394E_fret',
+                scale=alt.Scale(domain=[-range_max, range_max], scheme='redblue'),
+            ),
+            opacity=alt.value(0.4),
+            tooltip=[
+                alt.Tooltip('atom_id_1', title='Residue #1'),
+                alt.Tooltip('atom_id_2', title='Residue #2'),
+            ],
+        )
+        .properties(width=600, height=600)
+    )
 
 
 def r0_curves(distance_a: float, distance_b: float) -> alt.Chart:
