@@ -84,3 +84,7 @@ def get_carbons(
         _get_atoms(residue, atom_select[residue.get_resname()]) for residue in residues
     ]
     return list(chain(*atoms))
+
+
+def filter_by_b_factor(atoms: list[Atom], cutoff) -> list[Atom]:
+    return [atom for atom in atoms if atom.get_bfactor() > cutoff]

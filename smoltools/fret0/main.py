@@ -12,16 +12,20 @@ def structure_to_chain(path: str, model: int = 0, chain: str = 'A') -> Chain:
     return select.get_chain(structure, model=model, chain=chain)
 
 
-def chain_to_distances(chain: Chain) -> pd.DataFrame:
+def chain_to_distances(chain: Chain, sasa_cutoff: float = None) -> pd.DataFrame:
     residues = select.get_residues(chain)
     alpha_carbons = select.get_alpha_carbons(residues)
+    if sasa_cutoff is not None:
+        alpha_carbons = select.filter_by_b_factor(alpha_carbons, cutoff=0.3)
     coords = coordinate_table(alpha_carbons)
     return distance.calculate_pairwise_distances(coords)
 
 
-def structure_to_distances(path: str, model: int = 0, chain: str = 'A') -> pd.DataFrame:
+def structure_to_distances(
+    path: str, model: int = 0, chain: str = 'A', sasa_cutoff: float = None
+) -> pd.DataFrame:
     chain = structure_to_chain(path, model=model, chain=chain)
-    return chain_to_distances(chain)
+    return chain_to_distances(chain, sasa_cutoff=sasa_cutoff)
 
 
 def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
@@ -39,7 +43,6 @@ def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
 def pairwise_distances(
     distances_a: pd.DataFrame,
     distances_b: pd.DataFrame,
-    sasa_cutoff: float = None,
 ) -> pd.DataFrame:
     """
     Reads in the alpha carbon coordinates of two pdb structures representing two
@@ -61,15 +64,6 @@ def pairwise_distances(
             conformation as well as the difference in pairwise distances between
             conformations.
     """
-
-    if sasa_cutoff is not None:
-        raise NotImplementedError()
-        # sasa_a = get_sasa(structure_a, chain_a)
-        # sasa_b = get_sasa(structure_a, chain_b)
-        # surface_residues = combine_surface_residues(sasa_a, sasa_b, cutoff=sasa_cutoff)
-        # pairwise_distance_df = filter_pairwise_distances_by_sasa(
-        #     pairwise_distance_df, surface_residues
-        # )
 
     return distance._merge_pairwise_distances(distances_a, distances_b).assign(
         delta_distance=lambda x: distance._calculate_delta_distance(

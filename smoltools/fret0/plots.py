@@ -5,13 +5,12 @@ import altair as alt
 import pandas as pd
 
 from smoltools.fret0.efficiency import generate_r0_curve
-from smoltools.fret0.utils import splice_e_fret_tables
 import smoltools.calculate.distance as distance
 import smoltools.resources.colors as colors
 
 
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
-    SIZE = 800
+    SIZE = 600
     return (
         alt.Chart(df)
         .mark_rect()
@@ -66,23 +65,9 @@ def delta_e_fret_map(df: pd.DataFrame) -> alt.Chart:
         tooltip=[
             alt.Tooltip('atom_id_1', title='Residue #1'),
             alt.Tooltip('atom_id_2', title='Residue #2'),
-            alt.Tooltip('E_fret_a', title='Conformation A', format='.1f'),
-            alt.Tooltip('E_fret_b', title='Conformation B', format='.1f'),
-            alt.Tooltip('delta_E_fret', title='\u0394E_fret', format='.1f'),
-        ],
-    )
-
-
-def spliced_e_fret_map(df) -> alt.Chart:
-    return _distance_map_base(
-        df.pipe(splice_e_fret_tables).loc[lambda x: x.delta_E_fret > 0.1]
-    ).encode(
-        color=alt.Color('E_fret', title='E_fret'),
-        tooltip=[
-            alt.Tooltip('atom_id_1', title='Residue #1'),
-            alt.Tooltip('atom_id_2', title='Residue #2'),
-            alt.Tooltip('E_fret', title='E_fret', format='.1f'),
-            alt.Tooltip('delta_E_fret', title='\u0394E_fret', format='.1f'),
+            alt.Tooltip('E_fret_a', title='Conformation A', format='.2f'),
+            alt.Tooltip('E_fret_b', title='Conformation B', format='.2f'),
+            alt.Tooltip('delta_E_fret', title='\u0394E_fret', format='.2f'),
         ],
     )
 
