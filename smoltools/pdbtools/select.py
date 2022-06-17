@@ -46,9 +46,11 @@ def get_residues(entity: Entity, residue_filter: set[str] = None) -> list[Residu
     """
     residues = Selection.unfold_entities(entity, 'R')
     if residue_filter is None:
-        return residues
+        return [residue for residue in residues if residue.get_id()[0] == ' ']
     else:
-        return list(filter(lambda x: x.get_resname() in residue_filter, residues))
+        return [
+            residue for residue in residues if residue.get_resname() in residue_filter
+        ]
 
 
 def get_alpha_carbons(residues: list[Residue]) -> list[Atom]:
@@ -77,15 +79,6 @@ def get_carbons(
 
     def _get_atoms(residue: Residue, atom_names: list[str]):
         return [residue[atom_name] for atom_name in atom_names]
-
-    # def _filter_atom_name(residue: Residue) -> list[Atom]:
-    #     """ """
-    #     return list(
-    #         filter(
-    #             lambda atom: atom.get_name() in atom_select[residue.get_resname()],
-    #             residue.get_atoms(),
-    #         )
-    #     )
 
     atoms = [
         _get_atoms(residue, atom_select[residue.get_resname()]) for residue in residues
