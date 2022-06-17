@@ -26,7 +26,7 @@ def read_pdb_from_bytes(id: str, pdb_bytes: bytes) -> Structure:
     Returns:
         Structure: Structure object containing data from the PDB file.
     """
-    pdb_stream = io.StringIO(pdb_bytes.decode('utf-8'))
+    pdb_stream = io.StringIO(pdb_bytes.decode('utf-8').replace('\r', '\n'))
     return PDBParser().get_structure(id, pdb_stream)
 
 
