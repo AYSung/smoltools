@@ -30,6 +30,19 @@ def distance_map(df: pd.DataFrame) -> alt.Chart:
     )
 
 
+def binned_distance_map(df: pd.DataFrame, bin_size: int) -> alt.Chart:
+    return _distance_map_base(df).encode(
+        color=alt.Color(
+            'distance', title='Distance (\u212B)', bin=alt.Bin(step=bin_size)
+        ),
+        tooltip=[
+            alt.Tooltip('atom_id_1', title='Atom #1'),
+            alt.Tooltip('atom_id_2', title='Atom #2'),
+            alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
+        ],
+    )
+
+
 def _add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
     return df.assign(
         noe_strength=lambda x: pd.cut(
