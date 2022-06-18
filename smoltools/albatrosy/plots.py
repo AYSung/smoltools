@@ -107,8 +107,8 @@ def distance_scatter(df: pd.DataFrame, noe_threshold: float) -> alt.Chart:
         )
         .mark_circle(size=100)
         .encode(
-            x=alt.X('distance_a', title='Distance in apo conformation'),
-            y=alt.Y('distance_b', title='Distance in bound conformation'),
+            x=alt.X('distance_a', title='Distance in Conformation A'),
+            y=alt.Y('distance_b', title='Distance in Conformation B'),
             color=alt.Color(
                 'delta_distance',
                 title='\u0394Distance (\u212B)',
