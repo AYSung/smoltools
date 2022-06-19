@@ -10,6 +10,7 @@ import smoltools.resources.colors as colors
 
 
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
+    """Common distance map components."""
     SIZE = 600
     return (
         alt.Chart(df)
@@ -36,6 +37,17 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
 def delta_distance_map(
     distances_a: pd.DataFrame, distances_b: pd.DataFrame, cutoff: int = 5
 ) -> alt.Chart:
+    """Heatmap of pairwise distance between each alpha carbon between two conformations.
+
+    Parameters:
+    -----------
+    DataFrame: Dataframe with the atom IDs (residue number) of each alpha carbon pair
+        and the distance (in angstroms) between each pair.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
     df = (
         distance._merge_pairwise_distances(distances_a, distances_b)
         .assign(delta_distance=lambda x: (x.distance_a - x.distance_b))
@@ -63,6 +75,19 @@ def delta_distance_map(
 
 
 def delta_e_fret_map(df: pd.DataFrame, cutoff: float = 0.1) -> alt.Chart:
+    """Heatmap of the difference in E_fret between each alpha carbon between two
+    conformations.
+
+    Parameters:
+    -----------
+    DataFrame: Dataframe with the atom IDs (residue number) of each atom pair and the
+        E_fret between each pair in each of the two conformations, as well as the
+        difference in the E_fret of each pair between the conformations.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
     range_max = df.delta_E_fret.abs().max()
 
     return _distance_map_base(
@@ -84,6 +109,19 @@ def delta_e_fret_map(df: pd.DataFrame, cutoff: float = 0.1) -> alt.Chart:
 
 
 def e_fret_scatter(df: pd.DataFrame, cutoff: float = 0.2) -> alt.Chart:
+    """Scatter plot of pairwise E_fret between each alpha carbon in one conformation
+    versus the other.
+
+    Parameters:
+    -----------
+    DataFrame: Dataframe with the atom IDs (residue number) of each atom pair and the
+        E_fret between each pair in each of the two conformations, as well as the
+        difference in the E_fret of each pair between the conformations.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
     range_max = df.delta_E_fret.abs().max()
 
     return (
@@ -112,12 +150,14 @@ def r0_curves(distance_a: float, distance_b: float) -> alt.Chart:
     Generates an interactive plot to visualize the FRET efficiencies for two residue
     pair differences as a function of R0.
 
-    Args:
-        distance_a (float): distance between FRET donor and acceptor in conformation_a
-        distance_b (float): distance between FRET donor and acceptor in conformation_b
+    Parameters:
+    -----------
+    distance_a (float): distance between FRET donor and acceptor in conformation_a
+    distance_b (float): distance between FRET donor and acceptor in conformation_b
 
     Returns:
-        Chart: interactive Altair chart.
+    --------
+    Chart: Altair chart object.
     """
     e_fret_by_distance, e_fret_delta = generate_r0_curve(distance_a, distance_b)
     nearest = alt.selection(

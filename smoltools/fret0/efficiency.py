@@ -15,17 +15,18 @@ def _calculate_delta_e_fret(e_fret_a: pd.Series, e_fret_b: pd.Series) -> pd.Seri
 
 
 def e_fret_between_conformations(df: pd.DataFrame, r0: float) -> pd.DataFrame:
-    """
-    Calculate FRET efficiencies from a pairwise distance DataFrame.
+    """Calculate FRET efficiencies from a pairwise distance DataFrame.
 
-    Args:
-        df (DataFrame): DataFrame with pairwise distances for conformation A and
-            conformation B.
-        r0 (float): R0 values used for calculating FRET efficiency.
+    Parameters:
+    -----------
+    df (DataFrame): DataFrame with pairwise distances for conformation A and
+        conformation B.
+    r0 (float): R0 values used for calculating FRET efficiency.
 
     Returns:
-        DataFrame: pandas DataFrame with FRET efficiency calculate for each residue
-            pair, as well as the change in FRET efficiency between conformations.
+    --------
+    DataFrame: DataFrame with FRET efficiency calculate for each residue
+        pair, as well as the change in FRET efficiency between conformations.
     """
     return df[['atom_id_1', 'atom_id_2']].assign(
         E_fret_a=_calculate_e_fret(df.distance_a, r0),
@@ -35,9 +36,7 @@ def e_fret_between_conformations(df: pd.DataFrame, r0: float) -> pd.DataFrame:
 
 
 def generate_r0_curve(distance_a: float, distance_b: float) -> pd.DataFrame:
-    """
-    Generate data for plotting FRET efficiency as a function of R0 for two distances.
-    """
+    """Generate data for FRET efficiency as a function of R0 for two distances."""
     r0_range = list(range(20, 81))
     e_fret_a = [_calculate_e_fret(distance_a, r0) for r0 in r0_range]
     e_fret_b = [_calculate_e_fret(distance_b, r0) for r0 in r0_range]

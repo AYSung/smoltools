@@ -1,9 +1,11 @@
+"""Collection of functions for generating plots for TROSY signal."""
 import altair as alt
 import numpy as np
 import pandas as pd
 
 
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
+    """Common distance map components."""
     SIZE = 600
     return (
         alt.Chart(df)
@@ -20,6 +22,17 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
 
 
 def distance_map(df: pd.DataFrame) -> alt.Chart:
+    """Heatmap of pairwise distance between each labelled atom.
+
+    Parameters:
+    -----------
+    DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+        and the distance (in angstroms) between each pair.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
     return _distance_map_base(df).encode(
         color=alt.Color('distance', title='Distance (\u212B)'),
         tooltip=[
@@ -31,6 +44,19 @@ def distance_map(df: pd.DataFrame) -> alt.Chart:
 
 
 def binned_distance_map(df: pd.DataFrame, bin_size: int) -> alt.Chart:
+    """Heatmap of pairwise distance between each labelled atom. Distances are binned
+    to reduce visual clutter.
+
+    Parameters:
+    -----------
+    DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+        and the distance (in angstroms) between each pair.
+    bin_size (int): Bin size for binning distances.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
     return _distance_map_base(df).encode(
         color=alt.Color(
             'distance', title='Distance (\u212B)', bin=alt.Bin(step=bin_size)
@@ -44,6 +70,7 @@ def binned_distance_map(df: pd.DataFrame, bin_size: int) -> alt.Chart:
 
 
 def _add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
+    """Add column converting distance into relative NOE strength."""
     return df.assign(
         noe_strength=lambda x: pd.cut(
             x.distance,
@@ -55,6 +82,17 @@ def _add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def noe_map(df: pd.DataFrame) -> alt.Chart:
+    """Heatmap of expected NOE between each labelled atom.
+
+    Parameters:
+    -----------
+    DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+        and the distance (in angstroms) between each pair.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
     return _distance_map_base(df.pipe(_add_noe_bins)).encode(
         color=alt.Color(
             'noe_strength',
@@ -75,6 +113,19 @@ def noe_map(df: pd.DataFrame) -> alt.Chart:
 
 
 def delta_distance_map(df: pd.DataFrame) -> alt.Chart:
+    """Heatmap of pairwise distance between each labelled atom.
+
+    Parameters:
+    -----------
+    DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom
+        pair and the distance (in angstroms) between each pair in each of the two
+        conformations, as well as the difference in pairwise distance between the
+        conformations.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
     range_max = df.delta_distance.abs().max()
 
     return _distance_map_base(df).encode(
@@ -96,6 +147,20 @@ def delta_distance_map(df: pd.DataFrame) -> alt.Chart:
 
 
 def distance_scatter(df: pd.DataFrame, noe_threshold: float) -> alt.Chart:
+    """Scatter plot of pairwise distance between each labelled atom in one conformation
+    versus the other.
+
+    Parameters:
+    -----------
+    DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom
+        pair and the distance (in angstroms) between each pair in each of the two
+        conformations, as well as the difference in pairwise distance between the
+        conformations.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
     range_max = df.delta_distance.abs().max()
 
     return (
