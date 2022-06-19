@@ -36,6 +36,7 @@ def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
     atoms (list[Atom]): List of PDB Atom.
 
     Returns:
+    --------
     DataFrame: Dataframe with the atom ID (residue number, carbon ID) as the index
         and the x, y, z coordinate of each atom as the columns.
     """
@@ -61,6 +62,7 @@ def path_to_chain(path: str, model: int = 0, chain: str = 'A') -> Chain:
     chain (str): Chain ID of desired chain (default = 'A')
 
     Returns:
+    --------
     Chain: PDB Chain object.
     """
     structure = load.read_pdb_from_path(path)
@@ -76,6 +78,7 @@ def chain_to_distances(chain: Chain) -> pd.DataFrame:
     chain (Chain): PDB Chain object.
 
     Returns:
+    --------
     DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
         and the distance (in angstroms) between each pair.
     """
@@ -96,6 +99,7 @@ def path_to_distances(path: str, model: int = 0, chain: str = 'A') -> pd.DataFra
     chain (str): Chain ID of desired chain (default = 'A')
 
     Returns:
+    --------
     DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
         and the distance (in angstroms) between each pair.
     """
