@@ -3,13 +3,8 @@ from Bio.PDB.Chain import Chain
 import pandas as pd
 
 import smoltools.calculate.distance as distance
-import smoltools.pdbtools.load as load
+from smoltools.pdbtools import path_to_chain
 import smoltools.pdbtools.select as select
-
-
-def path_to_chain(path: str, model: int = 0, chain: str = 'A') -> Chain:
-    structure = load.read_pdb_from_path(path)
-    return select.get_chain(structure, model=model, chain=chain)
 
 
 def chain_to_distances(chain: Chain, sasa_cutoff: float = None) -> pd.DataFrame:

@@ -4,7 +4,7 @@ from Bio.PDB.Residue import Residue
 import pandas as pd
 
 import smoltools.calculate.distance as distance
-import smoltools.pdbtools.load as load
+from smoltools.pdbtools import path_to_chain
 import smoltools.pdbtools.select as select
 
 
@@ -50,23 +50,6 @@ def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
     return pd.DataFrame(atom_info, columns=['atom_id', 'x', 'y', 'z']).set_index(
         'atom_id'
     )
-
-
-def path_to_chain(path: str, model: int = 0, chain: str = 'A') -> Chain:
-    """Extract the specified chain from a PDB file.
-
-    Parameters:
-    -----------
-    path (str): Path to PDB file.
-    model (int): Model number of desired chain (default = 0)
-    chain (str): Chain ID of desired chain (default = 'A')
-
-    Returns:
-    --------
-    Chain: PDB Chain object.
-    """
-    structure = load.read_pdb_from_path(path)
-    return select.get_chain(structure, model=model, chain=chain)
 
 
 def chain_to_distances(chain: Chain) -> pd.DataFrame:
