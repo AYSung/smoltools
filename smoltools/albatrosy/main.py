@@ -53,8 +53,8 @@ def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
 
 
 def chain_to_distances(chain: Chain) -> pd.DataFrame:
-    """Extract 3D coordinates of terminal carbons of branched-chain amino acids in the
-    given Chain object. Use if a chain object is already loaded.
+    """Calculate pairwise distances of terminal carbons of branched-chain amino acids
+    in the given Chain object. Use if a chain object is already loaded.
 
     Parameters:
     -----------
@@ -72,8 +72,8 @@ def chain_to_distances(chain: Chain) -> pd.DataFrame:
 
 
 def path_to_distances(path: str, model: int = 0, chain: str = 'A') -> pd.DataFrame:
-    """Extract 3D coordinates of terminal carbons of branched-chain amino acids in the
-    specified chain from a PDB file. Use if starting directly from PDB file.
+    """Calculate pairwise distances of terminal carbons of branched-chain amino acids
+    in the specified chain from a PDB file. Use if starting directly from PDB file.
 
     Parameters:
     -----------

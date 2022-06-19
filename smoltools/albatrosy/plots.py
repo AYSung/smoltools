@@ -1,3 +1,4 @@
+"""Collection of functions for generating plots for TROSY signal."""
 import altair as alt
 import numpy as np
 import pandas as pd
@@ -81,7 +82,7 @@ def _add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def noe_map(df: pd.DataFrame) -> alt.Chart:
-    """Heatmap of expect NOE between each labelled atom.
+    """Heatmap of expected NOE between each labelled atom.
 
     Parameters:
     -----------

@@ -11,15 +11,13 @@ from smoltools.pdbtools.exceptions import ChainNotFound
 
 
 def get_chain(structure: Structure, model: int, chain: str) -> Chain:
-    """
-    Returns a chain from a PDB structure object. Default is to return chain A of the
-    first model.
+    """Returns a chain from a PDB structure object.
 
     Parameters:
     -----------
     structure (Structure): PDB structure object.
-    model (int): Model number, default is 0.
-    chain (str): Chain identifier, default is A.
+    model (int): Model number.
+    chain (str): Chain identifier.
 
     Returns:
     --------
@@ -32,9 +30,8 @@ def get_chain(structure: Structure, model: int, chain: str) -> Chain:
 
 
 def get_residues(chain: Chain, residue_filter: set[str] = None) -> list[Residue]:
-    """
-    Produces a list of all residues in a PDB entity. Can provide a set of specific
-        residues to keep.
+    """Produces a list of all residues in a PDB entity. Can provide a set of specific
+    residues to keep.
 
     Parameters:
     -----------
@@ -58,8 +55,7 @@ def get_residues(chain: Chain, residue_filter: set[str] = None) -> list[Residue]
 
 
 def get_alpha_carbons(residues: list[Residue]) -> list[Atom]:
-    """
-    Returns a list of alpha carbons for a given list of residues.
+    """Returns a list of alpha carbons for a given list of residues.
 
     Parameters:
     -----------
@@ -85,8 +81,7 @@ def get_alpha_carbons(residues: list[Residue]) -> list[Atom]:
 def get_carbons(
     residues: list[Residue], atom_select: dict[str : list[str]]
 ) -> list[Atom]:
-    """
-    Returns a list of atoms from a list of residues that meet the atom selection
+    """Returns a list of atoms from a list of residues that meet the atom selection
     criteria. Requires a dictionary of the names of the atoms to retrieve for each
     amino acid.
     """
@@ -102,4 +97,5 @@ def get_carbons(
 
 
 def filter_by_b_factor(atoms: list[Atom], cutoff) -> list[Atom]:
+    """Returns a list of atoms with a b factor that meets the provided cutoff."""
     return [atom for atom in atoms if atom.get_bfactor() > cutoff]
