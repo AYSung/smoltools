@@ -1,7 +1,7 @@
 from smoltools.albatrosy.main import (
     get_labelled_carbons,
     coordinate_table,
-    structure_to_distances,
+    path_to_distances,
     chain_to_distances,
 )
 from smoltools.albatrosy.utils import (
