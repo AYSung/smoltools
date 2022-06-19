@@ -54,6 +54,7 @@ def get_residues(chain: Chain, residue_filter: set[str] = None) -> list[Residue]
         return [
             residue for residue in residues if residue.get_resname() in residue_filter
         ]
+    # TODO: error handling for empty residue list?
 
 
 def get_alpha_carbons(residues: list[Residue]) -> list[Atom]:
@@ -78,6 +79,7 @@ def get_alpha_carbons(residues: list[Residue]) -> list[Atom]:
 
     alpha_carbons = [_get_alpha_carbon(residue) for residue in residues]
     return list(chain(*alpha_carbons))
+    # TODO: error handling for empty residue list?
 
 
 def get_carbons(
@@ -96,6 +98,7 @@ def get_carbons(
         _get_atoms(residue, atom_select[residue.get_resname()]) for residue in residues
     ]
     return list(chain(*atoms))
+    # TODO: error handling for empty residue list?
 
 
 def filter_by_b_factor(atoms: list[Atom], cutoff) -> list[Atom]:
