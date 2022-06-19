@@ -7,7 +7,7 @@ import smoltools.pdbtools.load as load
 import smoltools.pdbtools.select as select
 
 
-def structure_to_chain(path: str, model: int = 0, chain: str = 'A') -> Chain:
+def path_to_chain(path: str, model: int = 0, chain: str = 'A') -> Chain:
     structure = load.read_pdb_from_path(path)
     return select.get_chain(structure, model=model, chain=chain)
 
@@ -21,10 +21,10 @@ def chain_to_distances(chain: Chain, sasa_cutoff: float = None) -> pd.DataFrame:
     return distance.calculate_pairwise_distances(coords)
 
 
-def structure_to_distances(
+def path_to_distances(
     path: str, model: int = 0, chain: str = 'A', sasa_cutoff: float = None
 ) -> pd.DataFrame:
-    chain = structure_to_chain(path, model=model, chain=chain)
+    chain = path_to_chain(path, model=model, chain=chain)
     return chain_to_distances(chain, sasa_cutoff=sasa_cutoff)
 
 
