@@ -7,6 +7,7 @@ import scipy.spatial.distance as ssd
 
 
 def _pairwise_distance(df: pd.DataFrame) -> np.ndarray:
+    """Return the euclidean distance between all 3D coordinates."""
     return ssd.cdist(df, df, 'euclidean')
 
 
@@ -17,7 +18,7 @@ def _tidy_pairwise_distances(df: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_pairwise_distances(df: pd.DataFrame) -> pd.DataFrame:
     """Given a dataframe with 3D coordinates of each residue, calculate the pairwise
-    distance between each residue.
+    distance between each residue and return in tidy form.
     """
     return (
         pd.DataFrame(
@@ -31,8 +32,8 @@ def calculate_pairwise_distances(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _merge_pairwise_distances(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.DataFrame:
-    """Merge two DataFrames of pairwise distances (intersection of residues pairs in each
-    dataset)
+    """Merge two DataFrames of pairwise distances (intersection of residues pairs in
+    each dataset)
     """
     return pd.merge(
         df_a,
@@ -46,21 +47,22 @@ def _merge_pairwise_distances(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.Data
 def pairwise_distance_between_conformations(
     distances_a: pd.DataFrame, distances_b: pd.DataFrame
 ) -> pd.DataFrame:
-    """
-    Given two DataFrames with the 3D coordinates of residues in two conformations,
-    return the pairwise distances between each residue in each conformation, as well
-    as the difference in pairwise distances between the two conformations.
+    """Given two DataFrames with the pairwise distances between each residue in two
+    conformation, return a merged DataFrame that also contains the difference in
+    pairwise distances between the conformations.
 
-    Args:
-        coord_a (DataFrame): DataFrame with x, y, z coordinates of residues in
-            conformation A.
-        coord_b (DataFrame): DataFrame with x, y, z coordinates of residues in
-            conformation B.
+    Parameters:
+    -----------
+    distances_a (DataFrame): Dataframe with the atom IDs (residue number, carbon ID)
+        of each atom pair and the distance (in angstroms) between each pair.
+    distances_b (DataFrame): Dataframe with the atom IDs (residue number, carbon ID)
+        of each atom pair and the distance (in angstroms) between each pair.
 
     Returns:
-        DataFrame: pandas DataFrame of the pairwise distance between residues for each
-            of the two conformations, and the difference in the pairwise distances
-            between the conformations. distances reported in angstroms.
+    --------
+    DataFrame: DataFrame of the pairwise distance between residues for each
+        of the two conformations, and the difference in the pairwise distances
+        between the conformations. Distances reported in angstroms.
     """
     return _merge_pairwise_distances(
         distances_a,
