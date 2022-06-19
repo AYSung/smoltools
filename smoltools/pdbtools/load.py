@@ -1,6 +1,5 @@
 """Functions for loading PDB files."""
 
-
 import io
 from pathlib import Path
 

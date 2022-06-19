@@ -7,6 +7,8 @@ from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 
+from smoltools.pdbtools.exceptions import ChainNotFound
+
 
 def get_chain(structure: Structure, model: int, chain: str) -> Chain:
     """
@@ -23,7 +25,10 @@ def get_chain(structure: Structure, model: int, chain: str) -> Chain:
     --------
     Chain: PDB chain object.
     """
-    return structure[model][chain]
+    try:
+        return structure[model][chain]
+    except KeyError as e:
+        raise ChainNotFound(structure.get_id(), model, chain) from e
 
 
 def get_residues(chain: Chain, residue_filter: set[str] = None) -> list[Residue]:
