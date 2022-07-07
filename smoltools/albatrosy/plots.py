@@ -74,9 +74,9 @@ def _add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
     return df.assign(
         noe_strength=lambda x: pd.cut(
             x.distance,
-            bins=[0, 2.5, 3.5, 5, 15, np.inf],
+            bins=[0, 5, 8, 10, np.inf],
             include_lowest=True,
-            labels=['strong', 'medium', 'weak', 'very weak', 'none'],
+            labels=['strong', 'medium', 'weak', 'none'],
         )
     )
 
