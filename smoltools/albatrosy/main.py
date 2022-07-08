@@ -3,7 +3,6 @@ from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
 import pandas as pd
 
-import smoltools.calculate.distance as distance
 from smoltools.pdbtools import path_to_chain
 import smoltools.pdbtools.select as select
 
@@ -107,12 +106,3 @@ def coordinates_from_path(path: str, model: int = 0, chain: str = 'A') -> pd.Dat
     """
     chain = path_to_chain(path, model=model, chain=chain)
     return coordinates_from_chain(chain)
-
-
-def coordinates_to_distances(
-    df_a: pd.DataFrame, df_b: pd.DataFrame = None
-) -> pd.DataFrame:
-    if df_b is None:
-        return distance.calculate_pairwise_distances(df_a, df_a)
-    else:
-        return distance.calculate_pairwise_distances(df_a, df_b)
