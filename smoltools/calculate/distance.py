@@ -19,7 +19,7 @@ def _tidy_pairwise_distances(df: pd.DataFrame) -> pd.DataFrame:
 def calculate_pairwise_distances(
     df_a: pd.DataFrame, df_b: pd.DataFrame = None
 ) -> pd.DataFrame:
-    """Given a dataframe with 3D coordinates of each residue, calculate the pairwise
+    """Given two dataframes with 3D coordinates of each residue, calculate the pairwise
     distance between each residue and return in tidy form.
     """
     if df_b is None:
