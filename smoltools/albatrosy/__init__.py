@@ -1,8 +1,9 @@
 from smoltools.albatrosy.main import (
     get_labelled_carbons,
     coordinate_table,
-    path_to_distances,
-    chain_to_distances,
+    coordinates_from_chain,
+    coordinates_from_path,
+    coordinates_to_distances,
 )
 from smoltools.albatrosy.utils import (
     splice_conformation_tables,

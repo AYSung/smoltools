@@ -52,7 +52,7 @@ def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
     )
 
 
-def chain_to_distances(chain: Chain) -> pd.DataFrame:
+def coordinates_from_chain(chain: Chain) -> pd.DataFrame:
     """Calculate pairwise distances of terminal carbons of branched-chain amino acids
     in the given Chain object. Use if a chain object is already loaded.
 
@@ -67,11 +67,30 @@ def chain_to_distances(chain: Chain) -> pd.DataFrame:
     """
     residues = select.get_residues(chain, residue_filter={'VAL', 'LEU', 'ILE'})
     labelled_atoms = get_labelled_carbons(residues)
-    coords = coordinate_table(labelled_atoms)
-    return distance.calculate_pairwise_distances(coords)
+    return coordinate_table(labelled_atoms)
+    # return distance.calculate_pairwise_distances(coords)
 
 
-def path_to_distances(path: str, model: int = 0, chain: str = 'A') -> pd.DataFrame:
+# def chain_to_distances(chain: Chain) -> pd.DataFrame:
+#     """Calculate pairwise distances of terminal carbons of branched-chain amino acids
+#     in the given Chain object. Use if a chain object is already loaded.
+
+#     Parameters:
+#     -----------
+#     chain (Chain): PDB Chain object.
+
+#     Returns:
+#     --------
+#     DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+#         and the distance (in angstroms) between each pair.
+#     """
+#     residues = select.get_residues(chain, residue_filter={'VAL', 'LEU', 'ILE'})
+#     labelled_atoms = get_labelled_carbons(residues)
+#     coords = coordinate_table(labelled_atoms)
+#     return distance.calculate_pairwise_distances(coords)
+
+
+def coordinates_from_path(path: str, model: int = 0, chain: str = 'A') -> pd.DataFrame:
     """Calculate pairwise distances of terminal carbons of branched-chain amino acids
     in the specified chain from a PDB file. Use if starting directly from PDB file.
 
@@ -87,4 +106,13 @@ def path_to_distances(path: str, model: int = 0, chain: str = 'A') -> pd.DataFra
         and the distance (in angstroms) between each pair.
     """
     chain = path_to_chain(path, model=model, chain=chain)
-    return chain_to_distances(chain)
+    return coordinates_from_chain(chain)
+
+
+def coordinates_to_distances(
+    df_a: pd.DataFrame, df_b: pd.DataFrame = None
+) -> pd.DataFrame:
+    if df_b is None:
+        return distance.calculate_pairwise_distances(df_a, df_a)
+    else:
+        return distance.calculate_pairwise_distances(df_a, df_b)
