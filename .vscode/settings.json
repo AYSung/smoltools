@@ -15,7 +15,7 @@
     ],
     "editor.formatOnSave": true,
     "python.testing.pytestArgs": [
-        "fret0"
+        "smoltools"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true
