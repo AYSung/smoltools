@@ -11,8 +11,8 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
         alt.Chart(df)
         .mark_rect()
         .encode(
-            x=alt.X('atom_id_1', title='Atom ID', sort=None),
-            y=alt.Y('atom_id_2', title='Atom ID', sort=None),
+            x=alt.X('atom_id_1', title='Atom ID [A]', sort=None),
+            y=alt.Y('atom_id_2', title='Atom ID [B]', sort=None),
         )
         .properties(
             width=SIZE,
@@ -98,7 +98,7 @@ def noe_map(df: pd.DataFrame) -> alt.Chart:
             'noe_strength',
             title='NOE',
             scale=alt.Scale(
-                domain=['strong', 'medium', 'weak', 'very weak', 'none'],
+                domain=['strong', 'medium', 'weak', 'none'],
                 scheme='blues',
                 reverse=True,
             ),
