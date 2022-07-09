@@ -1,3 +1,5 @@
+from enum import Enum, auto
+
 from Bio.PDB.Atom import Atom
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
@@ -7,24 +9,51 @@ from smoltools.pdbtools import path_to_chain
 import smoltools.pdbtools.select as select
 
 
-def get_labelled_carbons(residues: list[Residue]) -> list[Atom]:
+class LabelScheme(Enum):
+    ILV = auto()
+    ILVA = auto()
+    ILVMAT = auto()
+
+
+LABELLED_CARBONS = {
+    LabelScheme.ILV: {
+        'ILE': ['CD1', 'CG2'],
+        'LEU': ['CD1', 'CD2'],
+        'VAL': ['CG1', 'CG2'],
+    },
+    LabelScheme.ILVA: {
+        'ILE': ['CD1'],
+        'LEU': ['CD1', 'CD2'],
+        'VAL': ['CG1', 'CG2'],
+        'ALA': ['CB'],
+    },
+    LabelScheme.ILVMAT: {
+        'ILE': ['CD1', 'CG2'],
+        'LEU': ['CD1', 'CD2'],
+        'VAL': ['CG1', 'CG2'],
+        'MET': ['CE'],
+        'ALA': ['CB'],
+        'THR': ['CG2'],
+    },
+}
+
+
+def get_labelled_carbons(residues: list[Residue], mode: LabelScheme) -> list[Atom]:
     """Retrieve labelled carbons from branched-chain amino acids (VAL, LEU, ILE)
     from a list of residues.
 
     Parameters:
     -----------
     residues (list[Residue]): List of PDB Residue objects.
+    mode (LabelScheme): Enum for the heavy labelled carbons (options are ILV, ILVA,
+        ILVMAT, default is ILV)
 
     Returns:
     list[Atom]: List of PDB Atom objects.
     """
-    LABELLED_CARBONS = {
-        'VAL': ['CG1', 'CG2'],
-        'LEU': ['CD1', 'CD2'],
-        'ILE': ['CD1'],
-    }
 
-    return select.get_carbons(residues, LABELLED_CARBONS)
+    carbons = LABELLED_CARBONS[mode]
+    return select.get_carbons(residues, carbons)
 
 
 def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
@@ -51,51 +80,43 @@ def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
     )
 
 
-def coordinates_from_chain(chain: Chain) -> pd.DataFrame:
+def coordinates_from_chain(
+    chain: Chain, mode: LabelScheme = LabelScheme.ILV
+) -> pd.DataFrame:
     """Calculate pairwise distances of terminal carbons of branched-chain amino acids
     in the given Chain object. Use if a chain object is already loaded.
 
     Parameters:
     -----------
     chain (Chain): PDB Chain object.
+    mode (LabelScheme): Enum for the heavy labelled carbons (options are ILV, ILVA,
+        ILVMAT, default is ILV)
 
     Returns:
     --------
     DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
         and the distance (in angstroms) between each pair.
     """
-    residues = select.get_residues(chain, residue_filter={'VAL', 'LEU', 'ILE'})
-    labelled_atoms = get_labelled_carbons(residues)
+    residue_filter = {residue for residue in LABELLED_CARBONS[mode].keys()}
+    residues = select.get_residues(chain, residue_filter=residue_filter)
+    labelled_atoms = get_labelled_carbons(residues, mode)
     return coordinate_table(labelled_atoms)
-    # return distance.calculate_pairwise_distances(coords)
 
 
-# def chain_to_distances(chain: Chain) -> pd.DataFrame:
-#     """Calculate pairwise distances of terminal carbons of branched-chain amino acids
-#     in the given Chain object. Use if a chain object is already loaded.
-
-#     Parameters:
-#     -----------
-#     chain (Chain): PDB Chain object.
-
-#     Returns:
-#     --------
-#     DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
-#         and the distance (in angstroms) between each pair.
-#     """
-#     residues = select.get_residues(chain, residue_filter={'VAL', 'LEU', 'ILE'})
-#     labelled_atoms = get_labelled_carbons(residues)
-#     coords = coordinate_table(labelled_atoms)
-#     return distance.calculate_pairwise_distances(coords)
-
-
-def coordinates_from_path(path: str, model: int = 0, chain: str = 'A') -> pd.DataFrame:
+def coordinates_from_path(
+    path: str,
+    mode: LabelScheme = LabelScheme.ILV,
+    model: int = 0,
+    chain: str = 'A',
+) -> pd.DataFrame:
     """Calculate pairwise distances of terminal carbons of branched-chain amino acids
     in the specified chain from a PDB file. Use if starting directly from PDB file.
 
     Parameters:
     -----------
     path (str): Path to PDB file.
+    mode (LabelScheme): Enum for the heavy labelled carbons (options are ILV, ILVA,
+        ILVMAT, default is ILV)
     model (int): Model number of desired chain (default = 0)
     chain (str): Chain ID of desired chain (default = 'A')
 
@@ -105,4 +126,4 @@ def coordinates_from_path(path: str, model: int = 0, chain: str = 'A') -> pd.Dat
         and the distance (in angstroms) between each pair.
     """
     chain = path_to_chain(path, model=model, chain=chain)
-    return coordinates_from_chain(chain)
+    return coordinates_from_chain(chain, mode)
