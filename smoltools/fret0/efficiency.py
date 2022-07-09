@@ -28,7 +28,7 @@ def e_fret_between_conformations(df: pd.DataFrame, r0: float) -> pd.DataFrame:
     DataFrame: DataFrame with FRET efficiency calculate for each residue
         pair, as well as the change in FRET efficiency between conformations.
     """
-    return df[['atom_id_1', 'atom_id_2']].assign(
+    return df[['id_1', 'id_2']].assign(
         E_fret_a=_calculate_e_fret(df.distance_a, r0),
         E_fret_b=_calculate_e_fret(df.distance_b, r0),
         delta_E_fret=lambda x: _calculate_delta_e_fret(x.E_fret_a, x.E_fret_b),

@@ -30,12 +30,12 @@ def get_chain(structure: Structure, model: int, chain: str) -> Chain:
 
 
 def get_residues(chain: Chain, residue_filter: set[str] = None) -> list[Residue]:
-    """Produces a list of all residues in a PDB entity. Can provide a set of specific
+    """Produces a list of all residues in a PDB chain. Can provide a set of specific
     residues to keep.
 
     Parameters:
     -----------
-    entity (Entity): PDB entity object.
+    chain (Chain): PDB chain object.
     residue_filter (set[str]): Optional, a set (or other list-like) of three letter
         amino codes for the residues to keep. Default is to return all residues.
 

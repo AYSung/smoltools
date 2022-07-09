@@ -11,8 +11,18 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
         alt.Chart(df)
         .mark_rect()
         .encode(
-            x=alt.X('atom_id_1', title='Atom ID [A]', sort=None),
-            y=alt.Y('atom_id_2', title='Atom ID [B]', sort=None),
+            x=alt.X(
+                'id_1',
+                title='Atom ID [A]',
+                sort=None,
+                axis=alt.Axis(labels=False, ticks=False),
+            ),
+            y=alt.Y(
+                'id_2',
+                title='Atom ID [B]',
+                sort=None,
+                axis=alt.Axis(labels=False, ticks=False),
+            ),
         )
         .properties(
             width=SIZE,
@@ -36,8 +46,8 @@ def distance_map(df: pd.DataFrame) -> alt.Chart:
     return _distance_map_base(df).encode(
         color=alt.Color('distance', title='Distance (\u212B)'),
         tooltip=[
-            alt.Tooltip('atom_id_1', title='Atom #1'),
-            alt.Tooltip('atom_id_2', title='Atom #2'),
+            alt.Tooltip('id_1', title='Atom #1'),
+            alt.Tooltip('id_2', title='Atom #2'),
             alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
         ],
     )
@@ -62,8 +72,8 @@ def binned_distance_map(df: pd.DataFrame, bin_size: int) -> alt.Chart:
             'distance', title='Distance (\u212B)', bin=alt.Bin(step=bin_size)
         ),
         tooltip=[
-            alt.Tooltip('atom_id_1', title='Atom #1'),
-            alt.Tooltip('atom_id_2', title='Atom #2'),
+            alt.Tooltip('id_1', title='Atom #1'),
+            alt.Tooltip('id_2', title='Atom #2'),
             alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
         ],
     )
@@ -104,8 +114,8 @@ def noe_map(df: pd.DataFrame) -> alt.Chart:
             ),
         ),
         tooltip=[
-            alt.Tooltip('atom_id_1', title='Atom #1'),
-            alt.Tooltip('atom_id_2', title='Atom #2'),
+            alt.Tooltip('id_1', title='Atom #1'),
+            alt.Tooltip('id_2', title='Atom #2'),
             alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
             alt.Tooltip('noe_strength', title='NOE'),
         ],
@@ -135,8 +145,8 @@ def delta_distance_map(df: pd.DataFrame) -> alt.Chart:
             scale=alt.Scale(scheme='redblue', domain=[-range_max, range_max]),
         ),
         tooltip=[
-            alt.Tooltip('atom_id_1', title='Atom #1'),
-            alt.Tooltip('atom_id_2', title='Atom #2'),
+            alt.Tooltip('id_1', title='Atom #1'),
+            alt.Tooltip('id_2', title='Atom #2'),
             alt.Tooltip('distance_a', title='Conformation A (\u212B)', format='.1f'),
             alt.Tooltip('distance_b', title='Conformation B (\u212B)', format='.1f'),
             alt.Tooltip(
@@ -181,8 +191,8 @@ def distance_scatter(df: pd.DataFrame, noe_threshold: float) -> alt.Chart:
             ),
             opacity=alt.value(0.5),
             tooltip=[
-                alt.Tooltip('atom_id_1', title='Atom #1'),
-                alt.Tooltip('atom_id_2', title='Atom #2'),
+                alt.Tooltip('id_1', title='Atom #1'),
+                alt.Tooltip('id_2', title='Atom #2'),
                 alt.Tooltip(
                     'distance_a', title='Conformation A (\u212B)', format='.1f'
                 ),

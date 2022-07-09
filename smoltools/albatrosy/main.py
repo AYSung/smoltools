@@ -3,7 +3,7 @@ from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
 import pandas as pd
 
-from smoltools.pdbtools import path_to_chain
+from smoltools.pdbtools import path_to_chain, coordinate_table
 import smoltools.pdbtools.select as select
 
 
@@ -47,30 +47,6 @@ def get_labelled_carbons(residues: list[Residue], mode: str) -> list[Atom]:
     return select.get_carbons(residues, carbons)
 
 
-def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
-    """Extract 3D coordinates from list of atoms into DataFrame.
-
-    Parameters:
-    -----------
-    atoms (list[Atom]): List of PDB Atom.
-
-    Returns:
-    --------
-    DataFrame: Dataframe with the atom ID (residue number, carbon ID) as the index
-        and the x, y, z coordinate of each atom as the columns.
-    """
-
-    def _get_atom_info(atom: Atom) -> tuple:
-        residue_number = atom.get_parent().get_id()[1]
-        return f'{residue_number}-{atom.get_name()}', *atom.get_coord()
-
-    atom_info = [_get_atom_info(atom) for atom in atoms]
-
-    return pd.DataFrame(atom_info, columns=['atom_id', 'x', 'y', 'z']).set_index(
-        'atom_id'
-    )
-
-
 def coordinates_from_chain(chain: Chain, mode: str = 'ILV') -> pd.DataFrame:
     """Calculate pairwise distances of terminal carbons of branched-chain amino acids
     in the given Chain object. Use if a chain object is already loaded.
@@ -88,7 +64,14 @@ def coordinates_from_chain(chain: Chain, mode: str = 'ILV') -> pd.DataFrame:
     residue_filter = {residue for residue in LABELLED_CARBONS[mode].keys()}
     residues = select.get_residues(chain, residue_filter=residue_filter)
     labelled_atoms = get_labelled_carbons(residues, mode)
-    return coordinate_table(labelled_atoms)
+    return (
+        coordinate_table(labelled_atoms)
+        .assign(
+            id=lambda x: x.residue_name + x.residue_number.astype(str) + '-' + x.atom_id
+        )
+        .set_index('id')
+        .loc[:, ['x', 'y', 'z']]
+    )
 
 
 def coordinates_from_path(
