@@ -87,6 +87,7 @@ def _add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
             bins=[0, 5, 8, 10, np.inf],
             include_lowest=True,
             labels=['strong', 'medium', 'weak', 'none'],
+            ordered=True,
         )
     )
 
