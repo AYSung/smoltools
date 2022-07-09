@@ -7,7 +7,7 @@ from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 
-from smoltools.pdbtools.exceptions import ChainNotFound
+from smoltools.pdbtools.exceptions import ChainNotFound, NoResiduesFound
 
 
 def get_chain(structure: Structure, model: int, chain: str) -> Chain:
@@ -44,14 +44,21 @@ def get_residues(chain: Chain, residue_filter: set[str] = None) -> list[Residue]
     list[Residue]: List of PDB residue objects in the given entity that meet the
         residue filter.
     """
-    residues = [residue for residue in chain.get_residues()]
     if residue_filter is None:
-        return [residue for residue in residues if residue.get_id()[0] == ' ']
-    else:
-        return [
-            residue for residue in residues if residue.get_resname() in residue_filter
+        residues = [
+            residue for residue in chain.get_residues() if residue.get_id()[0] == ' '
         ]
-    # TODO: error handling for empty residue list?
+    else:
+        residues = [
+            residue
+            for residue in chain.get_residues()
+            if residue.get_resname() in residue_filter
+        ]
+
+    if not residues:
+        raise NoResiduesFound(chain)
+    else:
+        return residues
 
 
 def get_alpha_carbons(residues: list[Residue]) -> list[Atom]:
