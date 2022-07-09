@@ -11,8 +11,18 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
         alt.Chart(df)
         .mark_rect()
         .encode(
-            x=alt.X('id_1', title='Atom ID [A]', sort=None),
-            y=alt.Y('id_2', title='Atom ID [B]', sort=None),
+            x=alt.X(
+                'id_1',
+                title='Atom ID [A]',
+                sort=None,
+                axis=alt.Axis(labels=False, ticks=False),
+            ),
+            y=alt.Y(
+                'id_2',
+                title='Atom ID [B]',
+                sort=None,
+                axis=alt.Axis(labels=False, ticks=False),
+            ),
         )
         .properties(
             width=SIZE,
