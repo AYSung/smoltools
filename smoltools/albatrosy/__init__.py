@@ -1,12 +1,15 @@
 from smoltools.albatrosy.main import (
     get_labelled_carbons,
     coordinate_table,
-    path_to_distances,
-    chain_to_distances,
+    coordinates_from_chain,
+    coordinates_from_path,
 )
 from smoltools.albatrosy.utils import (
     splice_conformation_tables,
 )
-from smoltools.calculate.distance import pairwise_distance_between_conformations
+from smoltools.calculate.distance import (
+    pairwise_distance_between_conformations,
+    calculate_pairwise_distances,
+)
 
 import smoltools.albatrosy.plots as plots

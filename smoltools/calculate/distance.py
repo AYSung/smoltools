@@ -6,9 +6,9 @@ import pandas as pd
 import scipy.spatial.distance as ssd
 
 
-def _pairwise_distance(df: pd.DataFrame) -> np.ndarray:
+def _pairwise_distance(df_a: pd.DataFrame, df_b: pd.DataFrame) -> np.ndarray:
     """Return the euclidean distance between all 3D coordinates."""
-    return ssd.cdist(df, df, 'euclidean')
+    return ssd.cdist(df_a, df_b, 'euclidean')
 
 
 def _tidy_pairwise_distances(df: pd.DataFrame) -> pd.DataFrame:
@@ -16,15 +16,20 @@ def _tidy_pairwise_distances(df: pd.DataFrame) -> pd.DataFrame:
     return df.melt(value_name='distance', ignore_index=False).reset_index()
 
 
-def calculate_pairwise_distances(df: pd.DataFrame) -> pd.DataFrame:
-    """Given a dataframe with 3D coordinates of each residue, calculate the pairwise
+def calculate_pairwise_distances(
+    df_a: pd.DataFrame, df_b: pd.DataFrame = None
+) -> pd.DataFrame:
+    """Given two dataframes with 3D coordinates of each residue, calculate the pairwise
     distance between each residue and return in tidy form.
     """
+    if df_b is None:
+        df_b = df_a
+
     return (
         pd.DataFrame(
-            _pairwise_distance(df),
-            index=df.index,
-            columns=df.index,
+            _pairwise_distance(df_a, df_b),
+            index=df_a.index,
+            columns=df_b.index,
         )
         .rename_axis(index='atom_id_1', columns='atom_id_2')
         .pipe(_tidy_pairwise_distances)
