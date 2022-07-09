@@ -8,8 +8,8 @@ from smoltools.albatrosy.utils import (
     splice_conformation_tables,
 )
 from smoltools.calculate.distance import (
-    pairwise_distance_between_conformations,
-    calculate_pairwise_distances,
+    pairwise_distances_between_conformations,
+    pairwise_distances,
 )
 
 import smoltools.albatrosy.plots as plots

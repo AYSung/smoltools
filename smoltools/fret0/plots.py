@@ -7,23 +7,28 @@ import pandas as pd
 from smoltools.fret0.efficiency import generate_r0_curve
 import smoltools.calculate.distance as distance
 import smoltools.resources.colors as colors
+from smoltools.fret0.utils import lower_triangle, sort_table
 
 
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
     """Common distance map components."""
+    df = sort_table(df)
+
     SIZE = 600
     return (
         alt.Chart(df)
         .mark_rect()
         .encode(
             x=alt.X(
-                'atom_id_1:O',
+                'id_1:N',
                 title='Residue #',
+                sort=None,
                 axis=alt.Axis(labels=False, ticks=False),
             ),
             y=alt.Y(
-                'atom_id_2:O',
+                'id_2:N',
                 title='Residue #',
+                sort=None,
                 axis=alt.Axis(labels=False, ticks=False),
             ),
         )
@@ -51,7 +56,7 @@ def delta_distance_map(
     df = (
         distance._merge_pairwise_distances(distances_a, distances_b)
         .assign(delta_distance=lambda x: (x.distance_a - x.distance_b))
-        .loc[lambda x: (x.atom_id_1 < x.atom_id_2) & (x.delta_distance.abs() > cutoff)]
+        .loc[lambda x: lower_triangle(x) & (x.delta_distance.abs() > cutoff)]
     )
 
     range_max = df.delta_distance.abs().max()
@@ -63,8 +68,8 @@ def delta_distance_map(
             scale=alt.Scale(domain=[-range_max, range_max], scheme='redblue'),
         ),
         tooltip=[
-            alt.Tooltip('atom_id_1', title='Residue #1'),
-            alt.Tooltip('atom_id_2', title='Residue #2'),
+            alt.Tooltip('id_1', title='Residue #1'),
+            alt.Tooltip('id_2', title='Residue #2'),
             alt.Tooltip('distance_a', title='Conformation A (\u212B)', format='.1f'),
             alt.Tooltip('distance_b', title='Conformation B (\u212B)', format='.1f'),
             alt.Tooltip(
@@ -91,7 +96,7 @@ def delta_e_fret_map(df: pd.DataFrame, cutoff: float = 0.1) -> alt.Chart:
     range_max = df.delta_E_fret.abs().max()
 
     return _distance_map_base(
-        df.loc[lambda x: (x.atom_id_1 < x.atom_id_2) & (x.delta_E_fret.abs() > cutoff)]
+        df.loc[lambda x: lower_triangle(x) & (x.delta_E_fret.abs() > cutoff)]
     ).encode(
         color=alt.Color(
             'delta_E_fret',
@@ -99,8 +104,8 @@ def delta_e_fret_map(df: pd.DataFrame, cutoff: float = 0.1) -> alt.Chart:
             scale=alt.Scale(domain=[-range_max, range_max], scheme='redblue'),
         ),
         tooltip=[
-            alt.Tooltip('atom_id_1', title='Residue #1'),
-            alt.Tooltip('atom_id_2', title='Residue #2'),
+            alt.Tooltip('id_1', title='Residue #1'),
+            alt.Tooltip('id_2', title='Residue #2'),
             alt.Tooltip('E_fret_a', title='Conformation A', format='.2f'),
             alt.Tooltip('E_fret_b', title='Conformation B', format='.2f'),
             alt.Tooltip('delta_E_fret', title='\u0394E_fret', format='.2f'),
@@ -137,8 +142,8 @@ def e_fret_scatter(df: pd.DataFrame, cutoff: float = 0.2) -> alt.Chart:
             ),
             opacity=alt.value(0.4),
             tooltip=[
-                alt.Tooltip('atom_id_1', title='Residue #1'),
-                alt.Tooltip('atom_id_2', title='Residue #2'),
+                alt.Tooltip('id_1', title='Residue #1'),
+                alt.Tooltip('id_2', title='Residue #2'),
             ],
         )
         .properties(width=600, height=600)

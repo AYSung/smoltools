@@ -16,9 +16,7 @@ def _tidy_pairwise_distances(df: pd.DataFrame) -> pd.DataFrame:
     return df.melt(value_name='distance', ignore_index=False).reset_index()
 
 
-def calculate_pairwise_distances(
-    df_a: pd.DataFrame, df_b: pd.DataFrame = None
-) -> pd.DataFrame:
+def pairwise_distances(df_a: pd.DataFrame, df_b: pd.DataFrame = None) -> pd.DataFrame:
     """Given two dataframes with 3D coordinates of each residue, calculate the pairwise
     distance between each residue and return in tidy form.
     """
@@ -31,7 +29,7 @@ def calculate_pairwise_distances(
             index=df_a.index,
             columns=df_b.index,
         )
-        .rename_axis(index='atom_id_1', columns='atom_id_2')
+        .rename_axis(index='id_1', columns='id_2')
         .pipe(_tidy_pairwise_distances)
     )
 
@@ -43,13 +41,13 @@ def _merge_pairwise_distances(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.Data
     return pd.merge(
         df_a,
         df_b,
-        on=['atom_id_1', 'atom_id_2'],
+        on=['id_1', 'id_2'],
         suffixes=['_a', '_b'],
         validate='1:1',
     )
 
 
-def pairwise_distance_between_conformations(
+def pairwise_distances_between_conformations(
     distances_a: pd.DataFrame, distances_b: pd.DataFrame
 ) -> pd.DataFrame:
     """Given two DataFrames with the pairwise distances between each residue in two
