@@ -6,6 +6,7 @@ from smoltools.albatrosy.main import (
 )
 from smoltools.albatrosy.utils import (
     splice_conformation_tables,
+    lower_triangle,
 )
 from smoltools.calculate.distance import (
     pairwise_distances_between_conformations,
