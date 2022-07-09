@@ -3,7 +3,6 @@ from smoltools.albatrosy.main import (
     coordinate_table,
     coordinates_from_chain,
     coordinates_from_path,
-    LabelScheme,
 )
 from smoltools.albatrosy.utils import (
     splice_conformation_tables,

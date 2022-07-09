@@ -1,5 +1,3 @@
-from enum import Enum, auto
-
 from Bio.PDB.Atom import Atom
 from Bio.PDB.Chain import Chain
 from Bio.PDB.Residue import Residue
@@ -9,25 +7,19 @@ from smoltools.pdbtools import path_to_chain
 import smoltools.pdbtools.select as select
 
 
-class LabelScheme(Enum):
-    ILV = auto()
-    ILVA = auto()
-    ILVMAT = auto()
-
-
 LABELLED_CARBONS = {
-    LabelScheme.ILV: {
+    'ILV': {
         'ILE': ['CD1', 'CG2'],
         'LEU': ['CD1', 'CD2'],
         'VAL': ['CG1', 'CG2'],
     },
-    LabelScheme.ILVA: {
+    'ILVA': {
         'ILE': ['CD1'],
         'LEU': ['CD1', 'CD2'],
         'VAL': ['CG1', 'CG2'],
         'ALA': ['CB'],
     },
-    LabelScheme.ILVMAT: {
+    'ILVMAT': {
         'ILE': ['CD1', 'CG2'],
         'LEU': ['CD1', 'CD2'],
         'VAL': ['CG1', 'CG2'],
@@ -38,15 +30,14 @@ LABELLED_CARBONS = {
 }
 
 
-def get_labelled_carbons(residues: list[Residue], mode: LabelScheme) -> list[Atom]:
+def get_labelled_carbons(residues: list[Residue], mode: str) -> list[Atom]:
     """Retrieve labelled carbons from branched-chain amino acids (VAL, LEU, ILE)
     from a list of residues.
 
     Parameters:
     -----------
     residues (list[Residue]): List of PDB Residue objects.
-    mode (LabelScheme): Enum for the heavy labelled carbons (options are ILV, ILVA,
-        ILVMAT, default is ILV)
+    mode (str): Labelling scheme (options are ILV, ILVA, ILVMAT, default is ILV)
 
     Returns:
     list[Atom]: List of PDB Atom objects.
@@ -80,17 +71,14 @@ def coordinate_table(atoms: list[Atom]) -> pd.DataFrame:
     )
 
 
-def coordinates_from_chain(
-    chain: Chain, mode: LabelScheme = LabelScheme.ILV
-) -> pd.DataFrame:
+def coordinates_from_chain(chain: Chain, mode: str = 'ILV') -> pd.DataFrame:
     """Calculate pairwise distances of terminal carbons of branched-chain amino acids
     in the given Chain object. Use if a chain object is already loaded.
 
     Parameters:
     -----------
     chain (Chain): PDB Chain object.
-    mode (LabelScheme): Enum for the heavy labelled carbons (options are ILV, ILVA,
-        ILVMAT, default is ILV)
+    mode (str): Labelling scheme (options are ILV, ILVA, ILVMAT, default is ILV)
 
     Returns:
     --------
@@ -105,7 +93,7 @@ def coordinates_from_chain(
 
 def coordinates_from_path(
     path: str,
-    mode: LabelScheme = LabelScheme.ILV,
+    mode: str = 'ILV',
     model: int = 0,
     chain: str = 'A',
 ) -> pd.DataFrame:
@@ -115,8 +103,7 @@ def coordinates_from_path(
     Parameters:
     -----------
     path (str): Path to PDB file.
-    mode (LabelScheme): Enum for the heavy labelled carbons (options are ILV, ILVA,
-        ILVMAT, default is ILV)
+    mode (str): Labelling scheme (options are ILV, ILVA, ILVMAT, default is ILV)
     model (int): Model number of desired chain (default = 0)
     chain (str): Chain ID of desired chain (default = 'A')
 
