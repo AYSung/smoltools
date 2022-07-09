@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 
@@ -37,3 +38,16 @@ def splice_conformation_tables(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.Dat
             ],
         ]
     ).sort_values(['id_1', 'id_2'], key=extract_residue_number)
+
+
+def add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
+    """Add column converting distance into relative NOE strength."""
+    return df.assign(
+        noe_strength=lambda x: pd.cut(
+            x.distance,
+            bins=[0, 5, 8, 10, np.inf],
+            include_lowest=True,
+            labels=['strong', 'medium', 'weak', 'none'],
+            ordered=True,
+        )
+    )
