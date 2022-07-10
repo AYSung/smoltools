@@ -1,7 +1,8 @@
 """Collection of functions for generating plots for TROSY signal."""
 import altair as alt
-import numpy as np
 import pandas as pd
+
+from smoltools.albatrosy.utils import add_noe_bins
 
 
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
@@ -79,18 +80,6 @@ def binned_distance_map(df: pd.DataFrame, bin_size: int) -> alt.Chart:
     )
 
 
-def _add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
-    """Add column converting distance into relative NOE strength."""
-    return df.assign(
-        noe_strength=lambda x: pd.cut(
-            x.distance,
-            bins=[0, 5, 8, 10, np.inf],
-            include_lowest=True,
-            labels=['strong', 'medium', 'weak', 'none'],
-        )
-    )
-
-
 def noe_map(df: pd.DataFrame) -> alt.Chart:
     """Heatmap of expected NOE between each labelled atom.
 
@@ -103,7 +92,7 @@ def noe_map(df: pd.DataFrame) -> alt.Chart:
     --------
     Chart: Altair chart object.
     """
-    return _distance_map_base(df.pipe(_add_noe_bins)).encode(
+    return _distance_map_base(df.pipe(add_noe_bins)).encode(
         color=alt.Color(
             'noe_strength',
             title='NOE',

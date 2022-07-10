@@ -29,6 +29,8 @@ LABELLED_CARBONS = {
     },
 }
 
+LABELLING_SCHEMES = list(LABELLED_CARBONS.keys())
+
 
 def get_labelled_carbons(residues: list[Residue], mode: str) -> list[Atom]:
     """Retrieve labelled carbons from branched-chain amino acids (VAL, LEU, ILE)

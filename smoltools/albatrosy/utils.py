@@ -1,8 +1,13 @@
+import numpy as np
 import pandas as pd
 
 
 def extract_residue_number(s: pd.Series) -> pd.Series:
     return s.str.partition('-')[0].str[3:].astype(int)
+
+
+def lower_triangle(df: pd.DataFrame) -> pd.Series:
+    return extract_residue_number(df.id_1) < extract_residue_number(df.id_2)
 
 
 def splice_conformation_tables(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.DataFrame:
@@ -33,3 +38,16 @@ def splice_conformation_tables(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.Dat
             ],
         ]
     ).sort_values(['id_1', 'id_2'], key=extract_residue_number)
+
+
+def add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
+    """Add column converting distance into relative NOE strength."""
+    return df.assign(
+        noe_strength=lambda x: pd.cut(
+            x.distance,
+            bins=[0, 5, 8, 10, np.inf],
+            include_lowest=True,
+            labels=['strong', 'medium', 'weak', 'none'],
+            ordered=True,
+        )
+    )
