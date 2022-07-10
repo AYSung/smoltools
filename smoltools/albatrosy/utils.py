@@ -26,18 +26,23 @@ def splice_conformation_tables(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.Dat
         from the first conformation and the upper triangle of the DataFrame containing
         values from the second conformation.
     """
-    return pd.concat(
-        [
-            df_a.loc[
-                lambda x: extract_residue_number(x.id_1)
-                <= extract_residue_number(x.id_2)
-            ],
-            df_b.loc[
-                lambda x: extract_residue_number(x.id_1)
-                > extract_residue_number(x.id_2)
-            ],
-        ]
-    ).sort_values(['id_1', 'id_2'], key=extract_residue_number)
+    overlap = set(df_a.id_1).intersection(set(df_b.id_1))
+    return (
+        pd.concat(
+            [
+                df_a.loc[
+                    lambda x: extract_residue_number(x.id_1)
+                    <= extract_residue_number(x.id_2)
+                ],
+                df_b.loc[
+                    lambda x: extract_residue_number(x.id_1)
+                    > extract_residue_number(x.id_2)
+                ],
+            ]
+        )
+        .loc[lambda x: x.id_1.isin(overlap) & x.id_2.isin(overlap)]
+        .sort_values(['id_1', 'id_2'], key=extract_residue_number)
+    )
 
 
 def add_noe_bins(df: pd.DataFrame) -> pd.DataFrame:
