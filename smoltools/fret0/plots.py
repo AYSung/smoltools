@@ -5,7 +5,6 @@ import altair as alt
 import pandas as pd
 
 from smoltools.fret0.efficiency import generate_r0_curve
-import smoltools.calculate.distance as distance
 import smoltools.resources.colors as colors
 from smoltools.fret0.utils import lower_triangle, sort_table
 
@@ -39,9 +38,7 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
     )
 
 
-def delta_distance_map(
-    distances_a: pd.DataFrame, distances_b: pd.DataFrame, cutoff: int = 5
-) -> alt.Chart:
+def delta_distance_map(df: pd.DataFrame, cutoff: float = 5) -> alt.Chart:
     """Heatmap of pairwise distance between each alpha carbon between two conformations.
 
     Parameters:
@@ -53,11 +50,7 @@ def delta_distance_map(
     --------
     Chart: Altair chart object.
     """
-    df = (
-        distance._merge_pairwise_distances(distances_a, distances_b)
-        .assign(delta_distance=lambda x: (x.distance_a - x.distance_b))
-        .loc[lambda x: lower_triangle(x) & (x.delta_distance.abs() > cutoff)]
-    )
+    df = df.loc[lambda x: lower_triangle(x) & (x.delta_distance.abs() > cutoff)]
 
     range_max = df.delta_distance.abs().max()
 
