@@ -7,7 +7,7 @@ from smoltools.pdbtools import path_to_chain, coordinate_table
 import smoltools.pdbtools.select as select
 
 
-LABELLED_CARBONS = {
+LABELED_CARBONS = {
     'ILV': {
         'ILE': ['CD1', 'CG2'],
         'LEU': ['CD1', 'CD2'],
@@ -29,7 +29,7 @@ LABELLED_CARBONS = {
     },
 }
 
-LABELLING_SCHEMES = list(LABELLED_CARBONS.keys())
+LABELING_SCHEMES = list(LABELED_CARBONS.keys())
 
 
 def get_labelled_carbons(residues: list[Residue], mode: str) -> list[Atom]:
@@ -45,7 +45,7 @@ def get_labelled_carbons(residues: list[Residue], mode: str) -> list[Atom]:
     list[Atom]: List of PDB Atom objects.
     """
 
-    carbons = LABELLED_CARBONS[mode]
+    carbons = LABELED_CARBONS[mode]
     return select.get_carbons(residues, carbons)
 
 
@@ -63,7 +63,7 @@ def coordinates_from_chain(chain: Chain, mode: str = 'ILV') -> pd.DataFrame:
     DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
         and the distance (in angstroms) between each pair.
     """
-    residue_filter = {residue for residue in LABELLED_CARBONS[mode].keys()}
+    residue_filter = {residue for residue in LABELED_CARBONS[mode].keys()}
     residues = select.get_residues(chain, residue_filter=residue_filter)
     labelled_atoms = get_labelled_carbons(residues, mode)
     return (
