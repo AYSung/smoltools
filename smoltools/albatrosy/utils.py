@@ -26,7 +26,7 @@ def splice_conformation_tables(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.Dat
         from the first conformation and the upper triangle of the DataFrame containing
         values from the second conformation.
     """
-    overlap = set(df_a.id_1).intersection(set(df_b.id_1))
+    overlap = set(df_a.id_1) & set(df_b.id_1)
     return (
         pd.concat(
             [
