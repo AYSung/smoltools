@@ -14,13 +14,13 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
         .encode(
             x=alt.X(
                 'id_1',
-                title='Atom ID [A]',
+                title='Atom #1',
                 sort=None,
                 axis=alt.Axis(labels=False, ticks=False),
             ),
             y=alt.Y(
                 'id_2',
-                title='Atom ID [B]',
+                title='Atom #2',
                 sort=None,
                 axis=alt.Axis(labels=False, ticks=False),
             ),
