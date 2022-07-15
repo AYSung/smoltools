@@ -3,6 +3,7 @@ from smoltools.albatrosy.main import (
     coordinate_table,
     coordinates_from_chain,
     coordinates_from_path,
+    coordinates_from_path_presets,
     LABELING_SCHEMES,
     LABELED_CARBONS,
 )

@@ -105,3 +105,29 @@ def coordinates_from_path(
     """
     chain = path_to_chain(path, model=model, chain=chain)
     return coordinates_from_chain(chain, labeled_atoms)
+
+
+def coordinates_from_path_presets(
+    path: str,
+    mode: str = 'ILV',
+    model: int = 0,
+    chain: str = 'A',
+) -> pd.DataFrame:
+    """Calculate pairwise distances of terminal carbons of branched-chain amino acids
+    in the specified chain from a PDB file. Use if starting directly from PDB file.
+
+    Parameters:
+    -----------
+    path (str): Path to PDB file.
+    mode (str): Predefined labeled atom selections (choices are 'ILV', 'ILVA', and 'ILVMAT')
+    model (int): Model number of desired chain (default = 0)
+    chain (str): Chain ID of desired chain (default = 'A')
+
+    Returns:
+    --------
+    DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+        and the distance (in angstroms) between each pair.
+    """
+    labeled_atoms = LABELED_CARBONS[mode]
+    chain = path_to_chain(path, model=model, chain=chain)
+    return coordinates_from_chain(chain, labeled_atoms)
