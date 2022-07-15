@@ -9,18 +9,18 @@ import smoltools.pdbtools.select as select
 
 LABELED_CARBONS = {
     'ILV': {
-        'ILE': ['CD1', 'CG2'],
+        'ILE': ['CD', 'CD1', 'CG2'],
         'LEU': ['CD1', 'CD2'],
         'VAL': ['CG1', 'CG2'],
     },
     'ILVA': {
-        'ILE': ['CD1'],
+        'ILE': ['CD', 'CD1'],
         'LEU': ['CD1', 'CD2'],
         'VAL': ['CG1', 'CG2'],
         'ALA': ['CB'],
     },
     'ILVMAT': {
-        'ILE': ['CD1', 'CG2'],
+        'ILE': ['CD', 'CD1', 'CG2'],
         'LEU': ['CD1', 'CD2'],
         'VAL': ['CG1', 'CG2'],
         'MET': ['CE'],
@@ -32,42 +32,47 @@ LABELED_CARBONS = {
 LABELING_SCHEMES = list(LABELED_CARBONS.keys())
 
 
-def get_labelled_carbons(residues: list[Residue], mode: str) -> list[Atom]:
+def get_labeled_carbons(
+    residues: list[Residue], labeled_atoms: dict[str, list[str]]
+) -> list[Atom]:
     """Retrieve labelled carbons from branched-chain amino acids (VAL, LEU, ILE)
     from a list of residues.
 
     Parameters:
     -----------
     residues (list[Residue]): List of PDB Residue objects.
-    mode (str): Labelling scheme (options are ILV, ILVA, ILVMAT, default is ILV)
+    labeled_atoms (dict): Dictionary mapping three letter residue ID (e.g. 'ILE')
+        to list of atoms to select (e.g. ['CD', 'CG2'])
 
     Returns:
     list[Atom]: List of PDB Atom objects.
     """
 
-    carbons = LABELED_CARBONS[mode]
-    return select.get_carbons(residues, carbons)
+    return select.get_carbons(residues, labeled_atoms)
 
 
-def coordinates_from_chain(chain: Chain, mode: str = 'ILV') -> pd.DataFrame:
+def coordinates_from_chain(
+    chain: Chain, labeled_atoms: dict[str, list[str]]
+) -> pd.DataFrame:
     """Calculate pairwise distances of terminal carbons of branched-chain amino acids
     in the given Chain object. Use if a chain object is already loaded.
 
     Parameters:
     -----------
     chain (Chain): PDB Chain object.
-    mode (str): Labelling scheme (options are ILV, ILVA, ILVMAT, default is ILV)
+    labeled_atoms (dict): Dictionary mapping three letter residue ID (e.g. 'ILE')
+        to list of atoms to select (e.g. ['CD', 'CG2'])
 
     Returns:
     --------
     DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
         and the distance (in angstroms) between each pair.
     """
-    residue_filter = {residue for residue in LABELED_CARBONS[mode].keys()}
+    residue_filter = set(labeled_atoms.keys())
     residues = select.get_residues(chain, residue_filter=residue_filter)
-    labelled_atoms = get_labelled_carbons(residues, mode)
+    atoms = get_labeled_carbons(residues, labeled_atoms)
     return (
-        coordinate_table(labelled_atoms)
+        coordinate_table(atoms)
         .assign(
             id=lambda x: x.residue_name + x.residue_number.astype(str) + '-' + x.atom_id
         )
@@ -77,6 +82,32 @@ def coordinates_from_chain(chain: Chain, mode: str = 'ILV') -> pd.DataFrame:
 
 
 def coordinates_from_path(
+    path: str,
+    labeled_atoms: dict[str, list[str]],
+    model: int = 0,
+    chain: str = 'A',
+) -> pd.DataFrame:
+    """Calculate pairwise distances of terminal carbons of branched-chain amino acids
+    in the specified chain from a PDB file. Use if starting directly from PDB file.
+
+    Parameters:
+    -----------
+    path (str): Path to PDB file.
+    labeled_atoms (dict): Dictionary mapping three letter residue ID (e.g. 'ILE')
+        to list of atoms to select (e.g. ['CD', 'CG2'])
+    model (int): Model number of desired chain (default = 0)
+    chain (str): Chain ID of desired chain (default = 'A')
+
+    Returns:
+    --------
+    DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+        and the distance (in angstroms) between each pair.
+    """
+    chain = path_to_chain(path, model=model, chain=chain)
+    return coordinates_from_chain(chain, labeled_atoms)
+
+
+def coordinates_from_path_presets(
     path: str,
     mode: str = 'ILV',
     model: int = 0,
@@ -88,7 +119,7 @@ def coordinates_from_path(
     Parameters:
     -----------
     path (str): Path to PDB file.
-    mode (str): Labelling scheme (options are ILV, ILVA, ILVMAT, default is ILV)
+    mode (str): Predefined labeled atom selections (choices are 'ILV', 'ILVA', and 'ILVMAT')
     model (int): Model number of desired chain (default = 0)
     chain (str): Chain ID of desired chain (default = 'A')
 
@@ -97,5 +128,6 @@ def coordinates_from_path(
     DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
         and the distance (in angstroms) between each pair.
     """
+    labeled_atoms = LABELED_CARBONS[mode]
     chain = path_to_chain(path, model=model, chain=chain)
-    return coordinates_from_chain(chain, mode)
+    return coordinates_from_chain(chain, labeled_atoms)

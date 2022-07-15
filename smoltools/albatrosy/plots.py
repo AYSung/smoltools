@@ -5,30 +5,34 @@ import pandas as pd
 from smoltools.albatrosy.utils import add_noe_bins
 
 
+def _get_axis_config(n_atoms: int) -> dict:
+    LABEL_THRESHOLD = 70
+    if n_atoms < LABEL_THRESHOLD:
+        return {'sort': None}
+    else:
+        # hide axis labels if there are too many rows and columns
+        return {'sort': None, 'axis': alt.Axis(labels=False, ticks=False)}
+
+
+def _get_size(n_atoms: int) -> int:
+    MAX_SIZE = 700
+    return min(MAX_SIZE, n_atoms * 10)
+
+
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
     """Common distance map components."""
-    SIZE = 600
+    n_atoms = df.id_1.nunique()
+    size = _get_size(n_atoms)
+    axis_config = _get_axis_config(n_atoms)
+
     return (
         alt.Chart(df)
         .mark_rect()
         .encode(
-            x=alt.X(
-                'id_1',
-                title='Atom #1',
-                sort=None,
-                axis=alt.Axis(labels=False, ticks=False),
-            ),
-            y=alt.Y(
-                'id_2',
-                title='Atom #2',
-                sort=None,
-                axis=alt.Axis(labels=False, ticks=False),
-            ),
+            x=alt.X('id_1', title='Atom #1', **axis_config),
+            y=alt.Y('id_2', title='Atom #2', **axis_config),
         )
-        .properties(
-            width=SIZE,
-            height=SIZE,
-        )
+        .properties(width=size, height=size)
     )
 
 
@@ -80,31 +84,98 @@ def binned_distance_map(df: pd.DataFrame, bin_size: int) -> alt.Chart:
     )
 
 
-def noe_map(df: pd.DataFrame) -> alt.Chart:
-    """Heatmap of expected NOE between each labelled atom.
+def _noe_map_base(
+    df: pd.DataFrame, x_title: str = 'Atom #1', y_title: str = 'Atom #2'
+) -> alt.Chart:
+    n_atoms = df.id_1.nunique()
+    size = _get_size(n_atoms)
+    axis_config = _get_axis_config(n_atoms)
+
+    return (
+        alt.Chart(df.pipe(add_noe_bins))
+        .mark_rect()
+        .encode(
+            x=alt.X('id_1', title=x_title, **axis_config),
+            y=alt.Y('id_2', title=y_title, **axis_config),
+            color=alt.Color(
+                'noe_strength',
+                title='NOE',
+                scale=alt.Scale(
+                    domain=['strong', 'medium', 'weak', 'none'],
+                    scheme='blues',
+                    reverse=True,
+                ),
+            ),
+        )
+        .properties(width=size, height=size)
+    )
+
+
+def noe_map(df: pd.DataFrame):
+    """Heatmap of expected NOE between each labelled atom within a single chain.
 
     Parameters:
     -----------
-    DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+    df (DataFrame): Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
         and the distance (in angstroms) between each pair.
 
     Returns:
     --------
     Chart: Altair chart object.
     """
-    return _distance_map_base(df.pipe(add_noe_bins)).encode(
-        color=alt.Color(
-            'noe_strength',
-            title='NOE',
-            scale=alt.Scale(
-                domain=['strong', 'medium', 'weak', 'none'],
-                scheme='blues',
-                reverse=True,
-            ),
-        ),
+    return _noe_map_base(df).encode(
         tooltip=[
             alt.Tooltip('id_1', title='Atom #1'),
             alt.Tooltip('id_2', title='Atom #2'),
+            alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
+            alt.Tooltip('noe_strength', title='NOE'),
+        ],
+    )
+
+
+def spliced_noe_map(df: pd.DataFrame) -> alt.Chart:
+    """Spliced Heatmap of expected intra-chain NOE between each labelled atom for two chains.
+
+    Parameters:
+    -----------
+    df (DataFrame): Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+        and the distance (in angstroms) between each pair.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
+    return _noe_map_base(df).encode(
+        tooltip=[
+            alt.Tooltip('subunit', title='Chain'),
+            alt.Tooltip('id_1', title='Atom #1'),
+            alt.Tooltip('id_2', title='Atom #2'),
+            alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
+            alt.Tooltip('noe_strength', title='NOE'),
+        ],
+    )
+
+
+def interchain_noe_map(
+    df: pd.DataFrame, x_title: str = 'Chain 1', y_title: str = 'Chain 2'
+) -> alt.Chart:
+    """Heatmap of expected NOE between each labelled atom between two different chains.
+
+    Parameters:
+    -----------
+    df (DataFrame): Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+        and the distance (in angstroms) between each pair.
+    x_title (str): title for X axis.
+    y_title (str): title for Y axis.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
+    return _noe_map_base(df, x_title=x_title, y_title=y_title).encode(
+        tooltip=[
+            alt.Tooltip('id_1', title=x_title),
+            alt.Tooltip('id_2', title=y_title),
             alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
             alt.Tooltip('noe_strength', title='NOE'),
         ],
@@ -160,6 +231,7 @@ def distance_scatter(df: pd.DataFrame, noe_threshold: float) -> alt.Chart:
     --------
     Chart: Altair chart object.
     """
+    SIZE = 600
     range_max = df.delta_distance.abs().max()
 
     return (
@@ -194,7 +266,7 @@ def distance_scatter(df: pd.DataFrame, noe_threshold: float) -> alt.Chart:
             ],
         )
         .properties(
-            width=600,
-            height=600,
+            width=SIZE,
+            height=SIZE,
         )
     )

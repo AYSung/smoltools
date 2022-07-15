@@ -9,32 +9,28 @@ import smoltools.resources.colors as colors
 from smoltools.fret0.utils import lower_triangle, sort_table
 
 
+def _get_size(n_residues: int) -> int:
+    MAX_SIZE = 600
+    return min(MAX_SIZE, n_residues * 10)
+
+
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
     """Common distance map components."""
     df = sort_table(df)
 
-    SIZE = 600
+    n_residues = df.id_1.nunique()
+    size = _get_size(n_residues)
+
+    axis_config = {'sort': None, 'axis': alt.Axis(labels=False, ticks=False)}
+
     return (
         alt.Chart(df)
         .mark_rect()
         .encode(
-            x=alt.X(
-                'id_1:N',
-                title='Residue #',
-                sort=None,
-                axis=alt.Axis(labels=False, ticks=False),
-            ),
-            y=alt.Y(
-                'id_2:N',
-                title='Residue #',
-                sort=None,
-                axis=alt.Axis(labels=False, ticks=False),
-            ),
+            x=alt.X('id_1:N', title='Residue #', **axis_config),
+            y=alt.Y('id_2:N', title='Residue #', **axis_config),
         )
-        .properties(
-            width=SIZE,
-            height=SIZE,
-        )
+        .properties(width=size, height=size)
     )
 
 

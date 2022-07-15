@@ -10,7 +10,12 @@ def lower_triangle(df: pd.DataFrame) -> pd.Series:
     return extract_residue_number(df.id_1) < extract_residue_number(df.id_2)
 
 
-def splice_conformation_tables(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.DataFrame:
+def splice_conformation_tables(
+    df_a: pd.DataFrame,
+    df_b: pd.DataFrame,
+    chain_a_id: str = 'A',
+    chain_b_id: str = 'B',
+) -> pd.DataFrame:
     """Splice distance tables for two conformations together.
 
     Parameters:
@@ -33,15 +38,16 @@ def splice_conformation_tables(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.Dat
                 df_a.loc[
                     lambda x: extract_residue_number(x.id_1)
                     <= extract_residue_number(x.id_2)
-                ],
+                ].assign(subunit=chain_a_id),
                 df_b.loc[
                     lambda x: extract_residue_number(x.id_1)
                     > extract_residue_number(x.id_2)
-                ],
+                ].assign(subunit=chain_b_id),
             ]
         )
         .loc[lambda x: x.id_1.isin(overlap) & x.id_2.isin(overlap)]
         .sort_values(['id_1', 'id_2'], key=extract_residue_number)
+        .astype({'subunit': 'category'})
     )
 
 
