@@ -156,7 +156,9 @@ def spliced_noe_map(df: pd.DataFrame) -> alt.Chart:
     )
 
 
-def interchain_noe_map(df: pd.DataFrame, x_title: str, y_title: str) -> alt.Chart:
+def interchain_noe_map(
+    df: pd.DataFrame, x_title: str = 'Chain 1', y_title: str = 'Chain 2'
+) -> alt.Chart:
     """Heatmap of expected NOE between each labelled atom between two different chains.
 
     Parameters:
