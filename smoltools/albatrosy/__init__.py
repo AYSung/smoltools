@@ -4,6 +4,7 @@ from smoltools.albatrosy.main import (
     coordinates_from_chain,
     coordinates_from_path,
     LABELING_SCHEMES,
+    LABELED_CARBONS,
 )
 from smoltools.albatrosy.utils import (
     splice_conformation_tables,
