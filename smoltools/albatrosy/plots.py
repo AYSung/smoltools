@@ -32,10 +32,7 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
             x=alt.X('id_1', title='Atom #1', **axis_config),
             y=alt.Y('id_2', title='Atom #2', **axis_config),
         )
-        .properties(
-            width=size,
-            height=size,
-        )
+        .properties(width=size, height=size)
     )
 
 
