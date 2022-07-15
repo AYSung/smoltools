@@ -8,20 +8,18 @@ from smoltools.albatrosy.utils import add_noe_bins
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
     """Common distance map components."""
     SIZE = 600
+
+    if df.id_1.nunique() >= SIZE / 8:
+        axis_config = {'sort': None, 'axis': alt.Axis(labels=False, ticks=False)}
+    else:
+        axis_config = {'sort': None}
+
     return (
         alt.Chart(df)
         .mark_rect()
         .encode(
-            x=alt.X(
-                'id_1',
-                title='Atom #1',
-                sort=None,
-            ),
-            y=alt.Y(
-                'id_2',
-                title='Atom #2',
-                sort=None,
-            ),
+            x=alt.X('id_1', title='Atom #1', **axis_config),
+            y=alt.Y('id_2', title='Atom #2', **axis_config),
         )
         .properties(
             width=SIZE,
@@ -45,19 +43,8 @@ def distance_map(df: pd.DataFrame) -> alt.Chart:
     SIZE = 600
 
     return (
-        alt.Chart(df)
-        .mark_rect()
+        _distance_map_base(df)
         .encode(
-            x=alt.X(
-                'id_1',
-                title='Atom #1',
-                sort=None,
-            ),
-            y=alt.Y(
-                'id_2',
-                title='Atom #2',
-                sort=None,
-            ),
             color=alt.Color('distance', title='Distance (\u212B)'),
             tooltip=[
                 alt.Tooltip('id_1', title='Atom #1'),
