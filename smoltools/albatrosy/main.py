@@ -14,7 +14,7 @@ LABELED_CARBONS = {
         'VAL': ['CG1', 'CG2'],
     },
     'ILVA': {
-        'ILE': ['CD1'],
+        'ILE': ['CD'],
         'LEU': ['CD1', 'CD2'],
         'VAL': ['CG1', 'CG2'],
         'ALA': ['CB'],
@@ -32,7 +32,7 @@ LABELED_CARBONS = {
 LABELING_SCHEMES = list(LABELED_CARBONS.keys())
 
 
-def get_labelled_carbons(
+def get_labeled_carbons(
     residues: list[Residue], labeled_atoms: dict[str, list[str]]
 ) -> list[Atom]:
     """Retrieve labelled carbons from branched-chain amino acids (VAL, LEU, ILE)
@@ -41,7 +41,8 @@ def get_labelled_carbons(
     Parameters:
     -----------
     residues (list[Residue]): List of PDB Residue objects.
-    mode (str): Labelling scheme (options are ILV, ILVA, ILVMAT, default is ILV)
+    labeled_atoms (dict): Dictionary mapping three letter residue ID (e.g. 'ILE')
+        to list of atoms to select (e.g. ['CD', 'CG2'])
 
     Returns:
     list[Atom]: List of PDB Atom objects.
@@ -59,7 +60,8 @@ def coordinates_from_chain(
     Parameters:
     -----------
     chain (Chain): PDB Chain object.
-    mode (str): Labelling scheme (options are ILV, ILVA, ILVMAT, default is ILV)
+    labeled_atoms (dict): Dictionary mapping three letter residue ID (e.g. 'ILE')
+        to list of atoms to select (e.g. ['CD', 'CG2'])
 
     Returns:
     --------
@@ -68,7 +70,7 @@ def coordinates_from_chain(
     """
     residue_filter = set(labeled_atoms.keys())
     residues = select.get_residues(chain, residue_filter=residue_filter)
-    atoms = get_labelled_carbons(residues, labeled_atoms)
+    atoms = get_labeled_carbons(residues, labeled_atoms)
     return (
         coordinate_table(atoms)
         .assign(
@@ -81,7 +83,7 @@ def coordinates_from_chain(
 
 def coordinates_from_path(
     path: str,
-    mode: str = 'ILV',
+    labeled_atoms: dict[str, list[str]],
     model: int = 0,
     chain: str = 'A',
 ) -> pd.DataFrame:
@@ -91,7 +93,8 @@ def coordinates_from_path(
     Parameters:
     -----------
     path (str): Path to PDB file.
-    mode (str): Labelling scheme (options are ILV, ILVA, ILVMAT, default is ILV)
+    labeled_atoms (dict): Dictionary mapping three letter residue ID (e.g. 'ILE')
+        to list of atoms to select (e.g. ['CD', 'CG2'])
     model (int): Model number of desired chain (default = 0)
     chain (str): Chain ID of desired chain (default = 'A')
 
@@ -101,4 +104,4 @@ def coordinates_from_path(
         and the distance (in angstroms) between each pair.
     """
     chain = path_to_chain(path, model=model, chain=chain)
-    return coordinates_from_chain(chain, mode)
+    return coordinates_from_chain(chain, labeled_atoms)

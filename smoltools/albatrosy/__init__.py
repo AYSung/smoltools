@@ -1,5 +1,5 @@
 from smoltools.albatrosy.main import (
-    get_labelled_carbons,
+    get_labeled_carbons,
     coordinate_table,
     coordinates_from_chain,
     coordinates_from_path,
