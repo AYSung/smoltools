@@ -6,7 +6,7 @@ from smoltools.albatrosy.utils import add_noe_bins
 
 
 def _get_axis_config(n_atoms: int) -> dict:
-    LABEL_THRESHOLD = 75
+    LABEL_THRESHOLD = 70
     if n_atoms < LABEL_THRESHOLD:
         return {'sort': None}
     else:
@@ -15,7 +15,7 @@ def _get_axis_config(n_atoms: int) -> dict:
 
 
 def _get_size(n_atoms: int) -> int:
-    MAX_SIZE = 750
+    MAX_SIZE = 700
     return min(MAX_SIZE, n_atoms * 10)
 
 
