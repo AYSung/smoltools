@@ -9,7 +9,7 @@ import smoltools.pdbtools.select as select
 
 LABELED_CARBONS = {
     'ILV': {
-        'ILE': ['CD1', 'CG2'],
+        'ILE': ['CD', 'CG2'],
         'LEU': ['CD1', 'CD2'],
         'VAL': ['CG1', 'CG2'],
     },
@@ -20,7 +20,7 @@ LABELED_CARBONS = {
         'ALA': ['CB'],
     },
     'ILVMAT': {
-        'ILE': ['CD1', 'CG2'],
+        'ILE': ['CD', 'CG2'],
         'LEU': ['CD1', 'CD2'],
         'VAL': ['CG1', 'CG2'],
         'MET': ['CE'],
