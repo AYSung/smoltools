@@ -234,6 +234,7 @@ def distance_scatter(df: pd.DataFrame, noe_threshold: float) -> alt.Chart:
     --------
     Chart: Altair chart object.
     """
+    SIZE = 600
     range_max = df.delta_distance.abs().max()
 
     return (
@@ -268,7 +269,7 @@ def distance_scatter(df: pd.DataFrame, noe_threshold: float) -> alt.Chart:
             ],
         )
         .properties(
-            width=600,
-            height=600,
+            width=SIZE,
+            height=SIZE,
         )
     )
