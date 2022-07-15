@@ -117,6 +117,17 @@ def _noe_map_base(
 
 
 def noe_map(df: pd.DataFrame):
+    """Heatmap of expected NOE between each labelled atom within a single chain.
+
+    Parameters:
+    -----------
+    df (DataFrame): Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+        and the distance (in angstroms) between each pair.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
     return _noe_map_base(df).encode(
         tooltip=[
             alt.Tooltip('id_1', title='Atom #1'),
@@ -128,6 +139,17 @@ def noe_map(df: pd.DataFrame):
 
 
 def spliced_noe_map(df: pd.DataFrame) -> alt.Chart:
+    """Spliced Heatmap of expected intra-chain NOE between each labelled atom for two chains.
+
+    Parameters:
+    -----------
+    df (DataFrame): Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+        and the distance (in angstroms) between each pair.
+
+    Returns:
+    --------
+    Chart: Altair chart object.
+    """
     return _noe_map_base(df).encode(
         tooltip=[
             alt.Tooltip('subunit', title='Chain'),
@@ -140,12 +162,14 @@ def spliced_noe_map(df: pd.DataFrame) -> alt.Chart:
 
 
 def interchain_noe_map(df: pd.DataFrame, x_title: str, y_title: str) -> alt.Chart:
-    """Heatmap of expected NOE between each labelled atom.
+    """Heatmap of expected NOE between each labelled atom between two different chains.
 
     Parameters:
     -----------
-    DataFrame: Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
+    df (DataFrame): Dataframe with the atom IDs (residue number, carbon ID) of each atom pair
         and the distance (in angstroms) between each pair.
+    x_title (str): title for X axis.
+    y_title (str): title for Y axis.
 
     Returns:
     --------
