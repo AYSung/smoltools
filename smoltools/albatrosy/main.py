@@ -83,7 +83,7 @@ def coordinates_from_chain(
 
 def coordinates_from_path(
     path: str,
-    labeled_atoms: dict[str, list[str]] = LABELED_CARBONS['ILV'],
+    labeled_atoms: dict[str, list[str]],
     model: int = 0,
     chain: str = 'A',
 ) -> pd.DataFrame:
