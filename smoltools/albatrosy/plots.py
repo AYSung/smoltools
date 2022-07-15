@@ -16,13 +16,13 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
                 'id_1',
                 title='Atom #1',
                 sort=None,
-                axis=alt.Axis(labels=False, ticks=False),
+                # axis=alt.Axis(labels=False, ticks=False),
             ),
             y=alt.Y(
                 'id_2',
                 title='Atom #2',
                 sort=None,
-                axis=alt.Axis(labels=False, ticks=False),
+                # axis=alt.Axis(labels=False, ticks=False),
             ),
         )
         .properties(
@@ -44,13 +44,33 @@ def distance_map(df: pd.DataFrame) -> alt.Chart:
     --------
     Chart: Altair chart object.
     """
-    return _distance_map_base(df).encode(
-        color=alt.Color('distance', title='Distance (\u212B)'),
-        tooltip=[
-            alt.Tooltip('id_1', title='Atom #1'),
-            alt.Tooltip('id_2', title='Atom #2'),
-            alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
-        ],
+    SIZE = 600
+
+    return (
+        alt.Chart(df)
+        .mark_rect()
+        .encode(
+            x=alt.X(
+                'id_1',
+                title='Atom #1',
+                sort=None,
+            ),
+            y=alt.Y(
+                'id_2',
+                title='Atom #2',
+                sort=None,
+            ),
+            color=alt.Color('distance', title='Distance (\u212B)'),
+            tooltip=[
+                alt.Tooltip('id_1', title='Atom #1'),
+                alt.Tooltip('id_2', title='Atom #2'),
+                alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
+            ],
+        )
+        .properties(
+            width=SIZE,
+            height=SIZE,
+        )
     )
 
 
@@ -80,7 +100,7 @@ def binned_distance_map(df: pd.DataFrame, bin_size: int) -> alt.Chart:
     )
 
 
-def noe_map(df: pd.DataFrame) -> alt.Chart:
+def noe_map(df: pd.DataFrame, x_title: str = None, y_title: str = None) -> alt.Chart:
     """Heatmap of expected NOE between each labelled atom.
 
     Parameters:
@@ -92,22 +112,47 @@ def noe_map(df: pd.DataFrame) -> alt.Chart:
     --------
     Chart: Altair chart object.
     """
-    return _distance_map_base(df.pipe(add_noe_bins)).encode(
-        color=alt.Color(
-            'noe_strength',
-            title='NOE',
-            scale=alt.Scale(
-                domain=['strong', 'medium', 'weak', 'none'],
-                scheme='blues',
-                reverse=True,
+    SIZE = 600
+
+    if x_title is None:
+        x_title = 'Atom #1'
+    if y_title is None:
+        y_title = 'Atom #2'
+
+    return (
+        alt.Chart(df.pipe(add_noe_bins))
+        .mark_rect()
+        .encode(
+            x=alt.X(
+                'id_1',
+                title=x_title,
+                sort=None,
             ),
-        ),
-        tooltip=[
-            alt.Tooltip('id_1', title='Atom #1'),
-            alt.Tooltip('id_2', title='Atom #2'),
-            alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
-            alt.Tooltip('noe_strength', title='NOE'),
-        ],
+            y=alt.Y(
+                'id_2',
+                title=y_title,
+                sort=None,
+            ),
+            color=alt.Color(
+                'noe_strength',
+                title='NOE',
+                scale=alt.Scale(
+                    domain=['strong', 'medium', 'weak', 'none'],
+                    scheme='blues',
+                    reverse=True,
+                ),
+            ),
+            tooltip=[
+                alt.Tooltip('id_1', title=x_title),
+                alt.Tooltip('id_2', title=y_title),
+                alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
+                alt.Tooltip('noe_strength', title='NOE'),
+            ],
+        )
+        .properties(
+            width=SIZE,
+            height=SIZE,
+        )
     )
 
 
