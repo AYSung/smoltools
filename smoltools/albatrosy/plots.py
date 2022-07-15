@@ -5,14 +5,25 @@ import pandas as pd
 from smoltools.albatrosy.utils import add_noe_bins
 
 
+def _get_axis_config(n_atoms: int) -> dict:
+    LABEL_THRESHOLD = 75
+    if n_atoms < LABEL_THRESHOLD:
+        return {'sort': None}
+    else:
+        # hide axis labels if there are too many rows and columns
+        return {'sort': None, 'axis': alt.Axis(labels=False, ticks=False)}
+
+
+def _get_size(n_atoms: int) -> int:
+    MAX_SIZE = 750
+    return min(MAX_SIZE, n_atoms * 10)
+
+
 def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
     """Common distance map components."""
-    SIZE = 600
-
-    if df.id_1.nunique() >= SIZE / 8:
-        axis_config = {'sort': None, 'axis': alt.Axis(labels=False, ticks=False)}
-    else:
-        axis_config = {'sort': None}
+    n_atoms = df.id_1.nunique()
+    size = _get_size(n_atoms)
+    axis_config = _get_axis_config(n_atoms)
 
     return (
         alt.Chart(df)
@@ -22,8 +33,8 @@ def _distance_map_base(df: pd.DataFrame) -> alt.Chart:
             y=alt.Y('id_2', title='Atom #2', **axis_config),
         )
         .properties(
-            width=SIZE,
-            height=SIZE,
+            width=size,
+            height=size,
         )
     )
 
@@ -40,22 +51,13 @@ def distance_map(df: pd.DataFrame) -> alt.Chart:
     --------
     Chart: Altair chart object.
     """
-    SIZE = 600
-
-    return (
-        _distance_map_base(df)
-        .encode(
-            color=alt.Color('distance', title='Distance (\u212B)'),
-            tooltip=[
-                alt.Tooltip('id_1', title='Atom #1'),
-                alt.Tooltip('id_2', title='Atom #2'),
-                alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
-            ],
-        )
-        .properties(
-            width=SIZE,
-            height=SIZE,
-        )
+    return _distance_map_base(df).encode(
+        color=alt.Color('distance', title='Distance (\u212B)'),
+        tooltip=[
+            alt.Tooltip('id_1', title='Atom #1'),
+            alt.Tooltip('id_2', title='Atom #2'),
+            alt.Tooltip('distance', title='Distance (\u212B)', format='.1f'),
+        ],
     )
 
 
@@ -73,7 +75,6 @@ def binned_distance_map(df: pd.DataFrame, bin_size: int) -> alt.Chart:
     --------
     Chart: Altair chart object.
     """
-
     return _distance_map_base(df).encode(
         color=alt.Color(
             'distance', title='Distance (\u212B)', bin=alt.Bin(step=bin_size)
@@ -89,12 +90,9 @@ def binned_distance_map(df: pd.DataFrame, bin_size: int) -> alt.Chart:
 def _noe_map_base(
     df: pd.DataFrame, x_title: str = 'Atom #1', y_title: str = 'Atom #2'
 ) -> alt.Chart:
-    SIZE = 600
-
-    if df.id_1.nunique() >= SIZE / 8:
-        axis_config = {'sort': None, 'axis': alt.Axis(labels=False, ticks=False)}
-    else:
-        axis_config = {'sort': None}
+    n_atoms = df.id_1.nunique()
+    size = _get_size(n_atoms)
+    axis_config = _get_axis_config(n_atoms)
 
     return (
         alt.Chart(df.pipe(add_noe_bins))
@@ -112,7 +110,7 @@ def _noe_map_base(
                 ),
             ),
         )
-        .properties(width=SIZE, height=SIZE)
+        .properties(width=size, height=size)
     )
 
 
