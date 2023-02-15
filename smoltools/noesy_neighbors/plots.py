@@ -2,7 +2,7 @@
 import altair as alt
 import pandas as pd
 
-from smoltools.albatrosy.utils import add_noe_bins
+from smoltools.noesy_neighbors.utils import add_noe_bins
 
 
 def _get_axis_config(n_atoms: int) -> dict:
