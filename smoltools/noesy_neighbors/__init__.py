@@ -1,4 +1,4 @@
-from smoltools.albatrosy.main import (
+from smoltools.noesy_neighbors.main import (
     get_labeled_carbons,
     coordinate_table,
     coordinates_from_chain,
@@ -7,7 +7,7 @@ from smoltools.albatrosy.main import (
     LABELING_SCHEMES,
     LABELED_CARBONS,
 )
-from smoltools.albatrosy.utils import (
+from smoltools.noesy_neighbors.utils import (
     splice_conformation_tables,
     lower_triangle,
     add_noe_bins,
@@ -17,4 +17,4 @@ from smoltools.calculate.distance import (
     pairwise_distances,
 )
 
-import smoltools.albatrosy.plots as plots
+import smoltools.noesy_neighbors.plots as plots
