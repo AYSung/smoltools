@@ -22,7 +22,14 @@ def read_data_from_bytes(bytes_data: bytes) -> pd.DataFrame:
 
 
 def clean_import(df: pd.DataFrame) -> pd.DataFrame:
-    return df.rename(columns={'Kinetic read': 'time'}).astype({'time': str}).iloc[:, 1:]
+    return (
+        df.rename(columns={'Kinetic read': 'time'})
+        .astype({'time': str})
+        .iloc[:, 1:]
+        .pipe(convert_time)
+        .pipe(absorbance_to_consumption)
+        .pipe(tidy_data)
+    )
 
 
 def convert_time(df: pd.DataFrame) -> pd.DataFrame:
@@ -97,11 +104,9 @@ def convert_to_wide(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def rate_plate(df: pd.DataFrame) -> pd.DataFrame:
-    return (
-        df.pipe(convert_time)
-        .pipe(absorbance_to_consumption)
-        .pipe(tidy_data)
-        .pipe(filter_data, lower_percent=0.15, upper_percent=0.85)
-        .pipe(calculate_slopes)
-    )
+def rate_plate(
+    df: pd.DataFrame, lower_percent: float, upper_percent: float
+) -> pd.DataFrame:
+    return df.pipe(
+        filter_data, lower_percent=lower_percent, upper_percent=upper_percent
+    ).pipe(calculate_slopes)
