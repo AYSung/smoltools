@@ -3,6 +3,8 @@ import pandas as pd
 
 from smoltools.rate_my_plate.main import _get_thresholds
 
+PLATE_ORDER = [f'{row}{column}' for row in 'ABCDEFGH' for column in range(1, 13)]
+
 
 def _add_thresholds(
     df: pd.DataFrame, lower_percent: float, upper_percent: float
@@ -20,16 +22,27 @@ def consumption_curve(
     df: pd.DataFrame, lower_percent: float, upper_percent: float
 ) -> alt.Chart:
 
-    df_with_thresholds = _add_thresholds(df, lower_percent, upper_percent)
+    df_with_thresholds = df.groupby('well', as_index=False).apply(
+        _add_thresholds, lower_percent=lower_percent, upper_percent=upper_percent
+    )
     scatter = (
         alt.Chart()
         .mark_circle(size=60)
         .encode(
             x=alt.X('time', title='Time (minutes)'),
             y=alt.Y('nadh_consumed', title='NADH consumed'),
-            facet=alt.Facet('well', columns=12),
+            opacity=alt.condition(
+                (alt.datum.nadh_consumed > alt.datum.lower_threshold)
+                & (alt.datum.nadh_consumed < alt.datum.upper_threshold),
+                alt.value(0.8),
+                alt.value(0.2),
+            ),
         )
+    ).properties(
+        height=100,
+        width=150,
     )
+
     upper_rule = (
         alt.Chart()
         .mark_rule()
@@ -40,11 +53,9 @@ def consumption_curve(
         .mark_rule()
         .encode(y=alt.Y('lower_threshold', title='NADH consumed'))
     )
-    return alt.layer(
-        scatter, upper_rule, lower_rule, data=df_with_thresholds
-    ).properties(
-        height=100,
-        width=150,
+    return alt.layer(scatter, upper_rule, lower_rule, data=df_with_thresholds).facet(
+        facet=alt.Facet('well:N', title='well', sort=PLATE_ORDER),
+        columns=6,
     )
 
 
