@@ -22,9 +22,8 @@ def consumption_curve(
     df: pd.DataFrame, lower_percent: float, upper_percent: float
 ) -> alt.Chart:
 
-    df_with_thresholds = df.groupby('well', as_index=False).apply(
-        _add_thresholds, lower_percent=lower_percent, upper_percent=upper_percent
-    )
+    lower_threshold, upper_threshold = _get_thresholds(df, lower_percent, upper_percent)
+
     scatter = (
         alt.Chart()
         .mark_circle(size=60)
@@ -32,8 +31,8 @@ def consumption_curve(
             x=alt.X('time', title='Time (minutes)'),
             y=alt.Y('nadh_consumed', title='NADH consumed'),
             opacity=alt.condition(
-                (alt.datum.nadh_consumed > alt.datum.lower_threshold)
-                & (alt.datum.nadh_consumed < alt.datum.upper_threshold),
+                (alt.datum.nadh_consumed >= lower_threshold)
+                & (alt.datum.nadh_consumed <= upper_threshold),
                 alt.value(0.8),
                 alt.value(0.2),
             ),
@@ -44,16 +43,16 @@ def consumption_curve(
     )
 
     upper_rule = (
-        alt.Chart()
+        alt.Chart(pd.DataFrame({'upper_threshold': [upper_threshold]}))
         .mark_rule()
         .encode(y=alt.Y('upper_threshold', title='NADH consumed'))
     )
     lower_rule = (
-        alt.Chart()
+        alt.Chart(pd.DataFrame({'lower_threshold': [lower_threshold]}))
         .mark_rule()
         .encode(y=alt.Y('lower_threshold', title='NADH consumed'))
     )
-    return alt.layer(scatter, upper_rule, lower_rule, data=df_with_thresholds).facet(
+    return alt.layer(scatter, upper_rule, lower_rule, data=df).facet(
         facet=alt.Facet('well:N', title='well', sort=PLATE_ORDER),
         columns=6,
     )
