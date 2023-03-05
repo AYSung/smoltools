@@ -82,6 +82,7 @@ def _estimate_slope(df: pd.DataFrame) -> float:
 
 
 def calculate_slopes(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculates rate of NADH consumption / ATP production through linear regression."""
     return (
         df.groupby('well', as_index=False)
         .apply(_estimate_slope)
@@ -93,6 +94,13 @@ def calculate_slopes(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def normalize_to_protein_concentration(
+    df: pd.DataFrame, concentration: float
+) -> pd.DataFrame:
+    """Normalizes NADH consumption / ATP production rate to provided protein concentration (in uM)."""
+    return df.assign(rate=lambda x: x.rate / concentration)
+
+
 def convert_to_wide(df: pd.DataFrame) -> pd.DataFrame:
     return (
         df.pivot(index='column', columns='row', values='rate')
@@ -102,8 +110,13 @@ def convert_to_wide(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def rate_plate(
-    df: pd.DataFrame, lower_percent: float, upper_percent: float
+    df: pd.DataFrame,
+    lower_percent: float,
+    upper_percent: float,
+    concentration: float = 1,
 ) -> pd.DataFrame:
-    return df.pipe(
-        filter_data, lower_percent=lower_percent, upper_percent=upper_percent
-    ).pipe(calculate_slopes)
+    return (
+        df.pipe(filter_data, lower_percent=lower_percent, upper_percent=upper_percent)
+        .pipe(calculate_slopes)
+        .pipe(normalize_to_protein_concentration, concentration=concentration)
+    )
