@@ -64,11 +64,16 @@ def _get_thresholds(
 def filter_data(
     df: pd.DataFrame, lower_percent: float, upper_percent: float
 ) -> pd.DataFrame:
-    lower_threshold, upper_threshold = _get_thresholds(df, lower_percent, upper_percent)
-    return df.loc[
-        lambda x: (x.nadh_consumed >= lower_threshold)
-        & (x.nadh_consumed <= upper_threshold)
-    ]
+    def _filter_well(group: pd.DataFrame) -> pd.DataFrame:
+        lower_threshold, upper_threshold = _get_thresholds(
+            group, lower_percent, upper_percent
+        )
+        return group.loc[
+            lambda x: (x.nadh_consumed >= lower_threshold)
+            & (x.nadh_consumed <= upper_threshold)
+        ]
+
+    return df.groupby('well', as_index=False).apply(_filter_well).reset_index(drop=True)
 
 
 def _estimate_slope(df: pd.DataFrame) -> float:
