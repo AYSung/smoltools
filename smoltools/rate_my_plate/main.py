@@ -18,14 +18,13 @@ def read_data(path: str) -> pd.DataFrame:
 
 
 def read_data_from_bytes(bytes_data: bytes) -> pd.DataFrame:
-    return pd.read_excel(BytesIO(bytes_data), skiprows=2).pipe(clean_import)
+    return pd.read_excel(BytesIO(bytes_data), skiprows=1).pipe(clean_import)
 
 
 def clean_import(df: pd.DataFrame) -> pd.DataFrame:
     return (
         df.rename(columns={'Kinetic read': 'time'})
         .astype({'time': str})
-        .iloc[:, 1:]
         .pipe(convert_time)
         .pipe(absorbance_to_consumption)
         .pipe(tidy_data)
@@ -65,11 +64,16 @@ def _get_thresholds(
 def filter_data(
     df: pd.DataFrame, lower_percent: float, upper_percent: float
 ) -> pd.DataFrame:
-    lower_threshold, upper_threshold = _get_thresholds(df, lower_percent, upper_percent)
-    return df.loc[
-        lambda x: (x.nadh_consumed >= lower_threshold)
-        & (x.nadh_consumed <= upper_threshold)
-    ]
+    def _filter_well(group: pd.DataFrame) -> pd.DataFrame:
+        lower_threshold, upper_threshold = _get_thresholds(
+            group, lower_percent, upper_percent
+        )
+        return group.loc[
+            lambda x: (x.nadh_consumed >= lower_threshold)
+            & (x.nadh_consumed <= upper_threshold)
+        ]
+
+    return df.groupby('well', as_index=False).apply(_filter_well).reset_index(drop=True)
 
 
 def _estimate_slope(df: pd.DataFrame) -> float:
@@ -78,6 +82,7 @@ def _estimate_slope(df: pd.DataFrame) -> float:
 
 
 def calculate_slopes(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculates rate of NADH consumption / ATP production through linear regression."""
     return (
         df.groupby('well', as_index=False)
         .apply(_estimate_slope)
@@ -89,6 +94,13 @@ def calculate_slopes(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def normalize_to_protein_concentration(
+    df: pd.DataFrame, concentration: float
+) -> pd.DataFrame:
+    """Normalizes NADH consumption / ATP production rate to provided protein concentration (in uM)."""
+    return df.assign(rate=lambda x: x.rate / concentration)
+
+
 def convert_to_wide(df: pd.DataFrame) -> pd.DataFrame:
     return (
         df.pivot(index='column', columns='row', values='rate')
@@ -98,8 +110,13 @@ def convert_to_wide(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def rate_plate(
-    df: pd.DataFrame, lower_percent: float, upper_percent: float
+    df: pd.DataFrame,
+    lower_percent: float,
+    upper_percent: float,
+    concentration: float = 1,
 ) -> pd.DataFrame:
-    return df.pipe(
-        filter_data, lower_percent=lower_percent, upper_percent=upper_percent
-    ).pipe(calculate_slopes)
+    return (
+        df.pipe(filter_data, lower_percent=lower_percent, upper_percent=upper_percent)
+        .pipe(calculate_slopes)
+        .pipe(normalize_to_protein_concentration, concentration=concentration)
+    )

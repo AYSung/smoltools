@@ -7,12 +7,12 @@ PLATE_ORDER = [f'{row}{column}' for row in 'ABCDEFGH' for column in range(1, 13)
 
 
 def _add_thresholds(
-    df: pd.DataFrame, lower_percent: float, upper_percent: float
+    group: pd.DataFrame, lower_percent: float, upper_percent: float
 ) -> pd.DataFrame:
     lower_threshold, upper_threshold = _get_thresholds(
-        df, lower_percent=lower_percent, upper_percent=upper_percent
+        group, lower_percent=lower_percent, upper_percent=upper_percent
     )
-    return df.assign(
+    return group.assign(
         lower_threshold=lower_threshold,
         upper_threshold=upper_threshold,
     )
@@ -21,8 +21,9 @@ def _add_thresholds(
 def consumption_curve(
     df: pd.DataFrame, lower_percent: float, upper_percent: float
 ) -> alt.Chart:
-
-    lower_threshold, upper_threshold = _get_thresholds(df, lower_percent, upper_percent)
+    df_with_thresholds = df.groupby('well', as_index=False).apply(
+        _add_thresholds, lower_percent, upper_percent
+    )
 
     scatter = (
         alt.Chart()
@@ -31,8 +32,8 @@ def consumption_curve(
             x=alt.X('time', title='Time (minutes)'),
             y=alt.Y('nadh_consumed', title='NADH consumed'),
             opacity=alt.condition(
-                (alt.datum.nadh_consumed >= lower_threshold)
-                & (alt.datum.nadh_consumed <= upper_threshold),
+                (alt.datum.nadh_consumed >= alt.datum.lower_threshold)
+                & (alt.datum.nadh_consumed <= alt.datum.upper_threshold),
                 alt.value(0.8),
                 alt.value(0.2),
             ),
@@ -63,12 +64,16 @@ def kinetics_curves(df: pd.DataFrame) -> alt.Chart:
         alt.Chart(df)
         .mark_circle(size=60)
         .encode(
-            x=alt.X('column', title='Plate column'),
-            y=alt.Y('rate', title='Rate of NADH consumption'),
-            facet=alt.Facet('row', columns=4),
+            x=alt.X('column', title='Column'),
+            y=alt.Y('rate', title='Rate of NADH consumption / uM protein'),
+            tooltip=[
+                alt.Tooltip('well', title='Well'),
+                alt.Tooltip('rate', title='Rate', format='.2f'),
+            ],
+            facet=alt.Facet('row', title='Row', columns=4),
         )
         .properties(
-            height=150,
-            width=200,
+            height=200,
+            width=250,
         )
     )
