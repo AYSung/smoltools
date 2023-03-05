@@ -44,16 +44,16 @@ def consumption_curve(
     )
 
     upper_rule = (
-        alt.Chart()
+        alt.Chart(pd.DataFrame({'upper_threshold': [upper_threshold]}))
         .mark_rule()
         .encode(y=alt.Y('upper_threshold', title='NADH consumed'))
     )
     lower_rule = (
-        alt.Chart()
+        alt.Chart(pd.DataFrame({'lower_threshold': [lower_threshold]}))
         .mark_rule()
         .encode(y=alt.Y('lower_threshold', title='NADH consumed'))
     )
-    return alt.layer(scatter, upper_rule, lower_rule, data=df_with_thresholds).facet(
+    return alt.layer(scatter, upper_rule, lower_rule, data=df).facet(
         facet=alt.Facet('well:N', title='well', sort=PLATE_ORDER),
         columns=6,
     )
