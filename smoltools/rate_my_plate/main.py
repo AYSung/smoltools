@@ -18,14 +18,13 @@ def read_data(path: str) -> pd.DataFrame:
 
 
 def read_data_from_bytes(bytes_data: bytes) -> pd.DataFrame:
-    return pd.read_excel(BytesIO(bytes_data), skiprows=2).pipe(clean_import)
+    return pd.read_excel(BytesIO(bytes_data), skiprows=1).pipe(clean_import)
 
 
 def clean_import(df: pd.DataFrame) -> pd.DataFrame:
     return (
         df.rename(columns={'Kinetic read': 'time'})
         .astype({'time': str})
-        .iloc[:, 1:]
         .pipe(convert_time)
         .pipe(absorbance_to_consumption)
         .pipe(tidy_data)
