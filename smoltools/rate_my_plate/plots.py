@@ -64,13 +64,13 @@ def kinetics_curves(df: pd.DataFrame) -> alt.Chart:
         alt.Chart(df)
         .mark_circle(size=60)
         .encode(
-            x=alt.X('column', title='Plate column'),
-            y=alt.Y('rate', title='Rate of NADH consumption/ uM protein'),
+            x=alt.X('column', title='Column'),
+            y=alt.Y('rate', title='Rate of NADH consumption / uM protein'),
             tooltip=[
                 alt.Tooltip('well', title='Well'),
                 alt.Tooltip('rate', title='Rate', format='.2f'),
             ],
-            facet=alt.Facet('row', columns=4),
+            facet=alt.Facet('row', title='Row', columns=4),
         )
         .properties(
             height=200,
