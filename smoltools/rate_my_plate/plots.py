@@ -1,7 +1,7 @@
 import altair as alt
 import pandas as pd
 
-from smoltools.rate_my_plate.main import _get_thresholds
+from smoltools.rate_my_plate.main import _get_thresholds, _get_time_at_threshold
 
 PLATE_ORDER = [f'{row}{column}' for row in 'ABCDEFGH' for column in range(1, 13)]
 
@@ -12,9 +12,13 @@ def _add_thresholds(
     lower_threshold, upper_threshold = _get_thresholds(
         group, lower_percent=lower_percent, upper_percent=upper_percent
     )
+    start_time = _get_time_at_threshold(group, lower_threshold)
+    end_time = _get_time_at_threshold(group, upper_threshold)
     return group.assign(
         lower_threshold=lower_threshold,
         upper_threshold=upper_threshold,
+        start_time=start_time,
+        end_time=end_time,
     )
 
 
@@ -32,8 +36,8 @@ def consumption_curve(
             x=alt.X('time', title='Time (minutes)'),
             y=alt.Y('nadh_consumed', title='NADH consumed'),
             opacity=alt.condition(
-                (alt.datum.nadh_consumed >= alt.datum.lower_threshold)
-                & (alt.datum.nadh_consumed <= alt.datum.upper_threshold),
+                (alt.datum.time >= alt.datum.start_time)
+                & (alt.datum.time <= alt.datum.end_time),
                 alt.value(0.8),
                 alt.value(0.2),
             ),
@@ -46,12 +50,18 @@ def consumption_curve(
     upper_rule = (
         alt.Chart()
         .mark_rule()
-        .encode(y=alt.Y('upper_threshold', title='NADH consumed'))
+        .encode(
+            x=alt.X('end_time', title='Time (minutes)'),
+            # y=alt.Y('upper_threshold', title='NADH consumed'),
+        )
     )
     lower_rule = (
         alt.Chart()
         .mark_rule()
-        .encode(y=alt.Y('lower_threshold', title='NADH consumed'))
+        .encode(
+            x=alt.X('start_time', title='Time (minutes)'),
+            # y=alt.Y('lower_threshold', title='NADH consumed'),
+        )
     )
     return alt.layer(scatter, upper_rule, lower_rule, data=df_with_thresholds).facet(
         facet=alt.Facet('well:N', title='well', sort=PLATE_ORDER),
