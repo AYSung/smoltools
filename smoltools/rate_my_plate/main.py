@@ -39,9 +39,9 @@ def convert_time(df: pd.DataFrame) -> pd.DataFrame:
 def absorbance_to_consumption(df: pd.DataFrame) -> pd.DataFrame:
     """
     convert absorbance values into NADH consumption by normalizing to time zero and
-    dividing by extinction coefficient of NADH (0.00662).
+    dividing by extinction coefficient of NADH (0.00622).
     """
-    NADH_EXTINCTION_COEFFICIENT = 0.00662
+    NADH_EXTINCTION_COEFFICIENT = 0.00622
 
     return (df.iloc[0] - df) / NADH_EXTINCTION_COEFFICIENT
 
