@@ -6,7 +6,7 @@ from scipy.stats import linregress
 
 
 def _time_to_minutes(time: str) -> float:
-    hours, minutes, seconds = time.split(':')
+    hours, minutes, seconds = time.split(":")
     return (60 * int(hours)) + int(minutes) + (int(seconds) / 60)
 
 
@@ -23,8 +23,8 @@ def read_data_from_bytes(bytes_data: bytes) -> pd.DataFrame:
 
 def clean_import(df: pd.DataFrame) -> pd.DataFrame:
     return (
-        df.rename(columns={'Kinetic read': 'time'})
-        .astype({'time': str})
+        df.rename(columns={"Kinetic read": "time"})
+        .astype({"time": str})
         .pipe(convert_time)
         .pipe(absorbance_to_consumption)
         .pipe(tidy_data)
@@ -33,7 +33,7 @@ def clean_import(df: pd.DataFrame) -> pd.DataFrame:
 
 def convert_time(df: pd.DataFrame) -> pd.DataFrame:
     """convert time columns to fractions of a minute and set as index."""
-    return df.assign(time=lambda x: x.time.map(_time_to_minutes)).set_index('time')
+    return df.assign(time=lambda x: x.time.map(_time_to_minutes)).set_index("time")
 
 
 def absorbance_to_consumption(df: pd.DataFrame) -> pd.DataFrame:
@@ -48,7 +48,7 @@ def absorbance_to_consumption(df: pd.DataFrame) -> pd.DataFrame:
 
 def tidy_data(df: pd.DataFrame) -> pd.DataFrame:
     return df.melt(
-        var_name='well', value_name='nadh_consumed', ignore_index=False
+        var_name="well", value_name="nadh_consumed", ignore_index=False
     ).reset_index()
 
 
@@ -62,7 +62,12 @@ def _get_thresholds(
 
 
 def _get_time_at_threshold(df: pd.DataFrame, threshold: float) -> float:
-    return df.loc[lambda x: x.nadh_consumed >= threshold].time.min()
+    if threshold > df.nadh_consumed.max():
+        return df.time.max()
+    elif threshold < df.nadh_consumed.min():
+        return 0
+    else:
+        return df.loc[lambda x: x.nadh_consumed >= threshold].time.min()
 
 
 def filter_data(
@@ -76,7 +81,7 @@ def filter_data(
         end_time = _get_time_at_threshold(group, upper_threshold)
         return group.loc[lambda x: (x.time >= start_time) & (x.time <= end_time)]
 
-    return df.groupby('well', as_index=False).apply(_filter_well).reset_index(drop=True)
+    return df.groupby("well", as_index=False).apply(_filter_well).reset_index(drop=True)
 
 
 def _estimate_slope(df: pd.DataFrame) -> float:
@@ -87,13 +92,13 @@ def _estimate_slope(df: pd.DataFrame) -> float:
 def calculate_slopes(df: pd.DataFrame) -> pd.DataFrame:
     """Calculates rate of NADH consumption / ATP production through linear regression."""
     return (
-        df.groupby('well', as_index=False)
+        df.groupby("well", as_index=False)
         .apply(_estimate_slope)
-        .rename(columns={None: 'rate'})
+        .rename(columns={None: "rate"})
         .assign(
             row=lambda x: x.well.str[:1], column=lambda x: x.well.str[1:].astype(int)
         )
-        .sort_values(['row', 'column'])
+        .sort_values(["row", "column"])
     )
 
 
@@ -106,7 +111,7 @@ def normalize_to_protein_concentration(
 
 def convert_to_wide(df: pd.DataFrame) -> pd.DataFrame:
     return (
-        df.pivot(index='column', columns='row', values='rate')
+        df.pivot(index="column", columns="row", values="rate")
         .reset_index()
         .rename_axis(columns=None)
     )
